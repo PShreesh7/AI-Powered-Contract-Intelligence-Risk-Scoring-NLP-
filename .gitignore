@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+*.log
+# sample_contracts/ is tracked intentionally -- these are test fixtures for the team
+.DS_Store
+.pytest_cache/
+*.egg-info/
