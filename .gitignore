@@ -4,7 +4,14 @@ __pycache__/
 venv/
 .env
 *.log
-# sample_contracts/ is tracked intentionally -- these are test fixtures for the team
+
+# sample_contracts/ is tracked intentionally
+# -- these are test fixtures for the team
+
 .DS_Store
 .pytest_cache/
 *.egg-info/
+
+# CUAD dataset
+data/cuad/raw/
+data/cuad/processed/
