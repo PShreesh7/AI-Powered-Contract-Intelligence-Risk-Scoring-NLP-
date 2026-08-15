@@ -1,7 +1,7 @@
 # Legal contract intelligence platform
 
 An NLP platform for legal/compliance teams that ingests contracts (PDF/DOCX),
-extracts key entities (dates, parties, jurisdictions), classifies clauses
+extracts key entities (dates, parties, jurisdictions), classifies clause
 (termination, confidentiality, indemnification, etc.), and flags anomalous
 or high-risk clause language.
 
