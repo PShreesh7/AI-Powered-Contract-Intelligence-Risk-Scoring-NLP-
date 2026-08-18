@@ -1,7 +1,7 @@
 # Legal contract intelligence platform
 
 An NLP platform for legal/compliance teams that ingests contracts (PDF/DOCX),
-extracts key entities (dates, parties, jurisdictions), classifies clauses
+extracts key entities (dates, parties, jurisdictions), classifies clause
 (termination, confidentiality, indemnification, etc.), and flags anomalous
 or high-risk clause language.
 
@@ -12,7 +12,7 @@ See `docs/ARCHITECTURE.md` for the full pipeline design and
 
 ```bash
 python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+source venv/bin/activate  venv\Scripts\activate
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 ```
