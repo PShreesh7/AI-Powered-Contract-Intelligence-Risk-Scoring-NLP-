@@ -1,0 +1,66 @@
+/* ============================================================
+   Design tokens — "Docket"
+   Subject: a contract review tool. The visual language borrows
+   from the physical artifacts of legal review — paper, ink,
+   hairline rules, and a wax-seal stamp for the risk verdict —
+   rather than a generic SaaS dashboard.
+   ============================================================ */
+
+:root {
+  /* Color */
+  --ink: #1c2430;
+  --ink-soft: #3d4756;
+  --paper: #faf8f3;
+  --paper-dim: #f1eee5;
+  --paper-panel: #ffffff;
+  --rule: #dad4c4;
+  --rule-strong: #b9b2a0;
+  --brass: #9c7a2e;
+  --brass-soft: #e8dcbd;
+
+  --risk-high: #a8402b;
+  --risk-high-bg: #f6e4df;
+  --risk-med: #b3862c;
+  --risk-med-bg: #f6ecd6;
+  --risk-low: #4b7455;
+  --risk-low-bg: #e5ede3;
+
+  /* Type */
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Layout */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --header-h: 64px;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+}
+
+button:focus-visible,
+[tabindex]:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
