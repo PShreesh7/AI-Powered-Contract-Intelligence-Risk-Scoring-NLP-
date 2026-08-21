@@ -1,0 +1,219 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---- Header ---- */
+.app-header {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 24px;
+  background: var(--ink);
+  color: var(--paper);
+  border-bottom: 3px solid var(--brass);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.brand-mark {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--brass-soft);
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+
+.doc-name {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #c7cdd6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--brass);
+  color: var(--ink);
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.upload-btn:hover { background: var(--brass-soft); }
+
+/* ---- Main layout ---- */
+.app-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1px;
+  background: var(--rule);
+}
+
+@media (max-width: 860px) {
+  .app-main { grid-template-columns: 1fr; }
+}
+
+.viewer-pane {
+  background: var(--paper);
+  padding: 40px clamp(24px, 6vw, 64px);
+  overflow-y: auto;
+}
+
+.side-pane {
+  background: var(--paper-panel);
+  padding: 28px 24px;
+  overflow-y: auto;
+}
+
+.status-line {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+}
+.status-error { color: var(--risk-high); }
+
+/* ---- Contract viewer ---- */
+.viewer-empty, .side-empty {
+  font-family: var(--font-body);
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 40ch;
+}
+
+.viewer-paper {
+  max-width: 68ch;
+}
+
+.viewer-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.85;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+.highlight {
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 0 1px;
+  transition: filter 0.12s ease;
+}
+.highlight:hover { filter: brightness(0.95); }
+.highlight.is-selected { box-shadow: 0 0 0 2px var(--ink); }
+
+.risk-high { background: var(--risk-high-bg); text-decoration: underline wavy var(--risk-high); text-decoration-thickness: 1px; }
+.risk-medium { background: var(--risk-med-bg); text-decoration: underline var(--risk-med); text-decoration-thickness: 1px; }
+.risk-low { background: var(--risk-low-bg); }
+
+/* ---- Risk gauge ---- */
+.gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 20px;
+}
+
+.gauge-svg { width: 180px; height: auto; }
+.gauge-ring { fill: none; stroke: var(--rule); stroke-width: 1; }
+.gauge-score {
+  font-family: var(--font-display);
+  font-size: 34px;
+  fill: var(--ink);
+}
+.gauge-max {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--ink-soft);
+}
+.gauge-verdict {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: -8px;
+}
+
+/* ---- Clause list ---- */
+.side-heading {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 12px;
+  color: var(--ink);
+}
+
+.clause-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clause-item {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.clause-item:hover { border-color: var(--rule-strong); }
+.clause-item.is-selected { border-color: var(--ink); background: var(--paper-dim); }
+
+.clause-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.clause-label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.risk-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.risk-badge.risk-high { background: var(--risk-high-bg); color: var(--risk-high); }
+.risk-badge.risk-medium { background: var(--risk-med-bg); color: var(--risk-med); }
+.risk-badge.risk-low { background: var(--risk-low-bg); color: var(--risk-low); }
+
+.clause-rationale {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0;
+}
