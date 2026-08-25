@@ -5,8 +5,20 @@ import shutil
 import tempfile
 import uuid
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import (
+    FastAPI,
+    File,
+    HTTPException,
+    UploadFile,
+)
+
+from fastapi.middleware.cors import (
+    CORSMiddleware,
+)
+
+from app.clauses.clause_classifier import (
+    classifier_from_environment,
+)
 
 from app.ingestion.parser import (
     UnsupportedFileTypeError,
@@ -33,10 +45,7 @@ from app.utils.text_utils import (
 
 
 app = FastAPI(
-    title=(
-        "Legal Contract "
-        "Intelligence API"
-    ),
+    title="Legal Contract Intelligence API",
     version="0.1.0",
 )
 
@@ -53,33 +62,17 @@ _entity_extractor: EntityExtractor | None = None
 _clause_classifier: ClauseClassifier | None = None
 
 
-@app.on_event(
-    "startup"
-)
+@app.on_event("startup")
 def load_models():
+    global _entity_extractor, _clause_classifier
 
-    global (
-        _entity_extractor
-    )
+    _entity_extractor = EntityExtractor()
 
-    global (
-        _clause_classifier
-    )
-
-    _entity_extractor = (
-        EntityExtractor()
-    )
-
-    _clause_classifier = (
-        classifier_from_environment()
-    )
+    _clause_classifier = classifier_from_environment()
 
 
-@app.get(
-    "/health"
-)
+@app.get("/health")
 def health():
-
     return {
         "status": "ok"
     }
@@ -87,26 +80,18 @@ def health():
 
 @app.post(
     "/analyze",
-    response_model=(
-        AnalyzeResponse
-    ),
+    response_model=AnalyzeResponse,
 )
 async def analyze_contract(
     file: UploadFile = File(...),
 ):
-
     if (
-        _entity_extractor
-        is None
-        or _clause_classifier
-        is None
+        _entity_extractor is None
+        or _clause_classifier is None
     ):
         raise HTTPException(
             status_code=503,
-            detail=(
-                "Models are not "
-                "loaded yet."
-            ),
+            detail="Models are not loaded yet.",
         )
 
     filename = (
@@ -114,48 +99,33 @@ async def analyze_contract(
         or "contract"
     )
 
-    suffix = (
-        os.path.splitext(
-            filename
-        )[1]
-    )
+    suffix = os.path.splitext(
+        filename
+    )[1]
 
-    with (
-        tempfile
-        .NamedTemporaryFile(
-            delete=False,
-            suffix=suffix,
-        )
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=suffix,
     ) as tmp:
-
         shutil.copyfileobj(
             file.file,
             tmp,
         )
 
-        tmp_path = (
-            tmp.name
-        )
+        tmp_path = tmp.name
 
     try:
-
-        raw_text = (
-            extract_text(
-                tmp_path
-            )
+        raw_text = extract_text(
+            tmp_path
         )
 
-    except (
-        UnsupportedFileTypeError
-    ) as exc:
-
+    except UnsupportedFileTypeError as exc:
         raise HTTPException(
             status_code=400,
             detail=str(exc),
-        )
+        ) from exc
 
     finally:
-
         if os.path.exists(
             tmp_path
         ):
@@ -168,8 +138,7 @@ async def analyze_contract(
     )
 
     entities = (
-        _entity_extractor
-        .extract(
+        _entity_extractor.extract(
             text
         )
     )
@@ -184,10 +153,7 @@ async def analyze_contract(
 
     cursor = 0
 
-    for clause in (
-        clause_texts
-    ):
-
+    for clause in clause_texts:
         start = text.find(
             clause,
             cursor,
@@ -211,8 +177,7 @@ async def analyze_contract(
         cursor = end
 
     clauses = (
-        _clause_classifier
-        .classify(
+        _clause_classifier.classify(
             clause_texts,
             offsets,
         )
@@ -224,21 +189,17 @@ async def analyze_contract(
         )
     )
 
-    analysis = (
-        DocumentAnalysis(
-            document_id=str(
-                uuid.uuid4()
-            ),
-            filename=filename,
-            raw_text_length=(
-                len(text)
-            ),
-            entities=entities,
-            clauses=clauses,
-            risk_flags=(
-                risk_flags
-            ),
-        )
+    analysis = DocumentAnalysis(
+        document_id=str(
+            uuid.uuid4()
+        ),
+        filename=filename,
+        raw_text_length=len(
+            text
+        ),
+        entities=entities,
+        clauses=clauses,
+        risk_flags=risk_flags,
     )
 
     return AnalyzeResponse(status="success", analysis=analysis)
