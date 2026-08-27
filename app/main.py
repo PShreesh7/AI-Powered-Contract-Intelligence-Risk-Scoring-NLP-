@@ -11,6 +11,10 @@ import shutil
 import tempfile
 import uuid
 
+class QuestionRequest(BaseModel):
+    question: str
+    clause_texts: list[str]
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
