@@ -14,6 +14,12 @@ import uuid
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.responses import Response
+from app.reports.pdf_report import generate_pdf_report
+from app.qa.contract_qa import ask_question, QAUnavailableError
+from pydantic import BaseModel 
+
+
 from app.ingestion.parser import extract_text, UnsupportedFileTypeError
 from app.utils.text_utils import clean_text, split_into_clauses
 from app.ner.entity_extractor import EntityExtractor
