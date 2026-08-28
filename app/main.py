@@ -101,7 +101,7 @@ async def analyze_contract(file: UploadFile = File(...)):
     )
 
     
-return AnalyzeResponse(status="success", analysis=analysis)
+    return AnalyzeResponse(status="success", analysis=analysis)
 
 @app.post("/analyze/pdf-report")
 async def analyze_pdf_report(file: UploadFile = File(...)):
