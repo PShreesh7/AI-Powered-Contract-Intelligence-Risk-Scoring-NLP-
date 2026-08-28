@@ -11,6 +11,7 @@ import shutil
 import tempfile
 import uuid
 
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel 
