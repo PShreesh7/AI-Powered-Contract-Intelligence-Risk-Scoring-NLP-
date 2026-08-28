@@ -10,14 +10,10 @@ import os
 import shutil
 import tempfile
 import uuid
-from pydantic import BaseModel
-
-class QuestionRequest(BaseModel):
-    question: str
-    clause_texts: list[str]
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel 
 
 from fastapi.responses import Response
 from app.reports.pdf_report import generate_pdf_report
@@ -40,6 +36,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class QuestionRequest(BaseModel):
+    question: str
+    clause_texts: list[str]
 
 # Load models once at startup -- these are heavy, don't reload per-request
 _entity_extractor: EntityExtractor | None = None
