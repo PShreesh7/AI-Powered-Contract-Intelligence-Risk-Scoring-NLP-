@@ -10,6 +10,7 @@ import os
 import shutil
 import tempfile
 import uuid
+from pydantic import BaseModel
 
 class QuestionRequest(BaseModel):
     question: str
