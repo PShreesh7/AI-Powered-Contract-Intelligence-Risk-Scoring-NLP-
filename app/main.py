@@ -100,4 +100,69 @@ async def analyze_contract(file: UploadFile = File(...)):
         risk_flags=risk_flags,
     )
 
-    return AnalyzeResponse(status="success", analysis=analysis)
+    
+return AnalyzeResponse(status="success", analysis=analysis)
+
+@app.post("/analyze/pdf-report")
+async def analyze_pdf_report(file: UploadFile = File(...)):
+    """Same pipeline as /analyze, but returns a downloadable PDF instead of JSON."""
+    if _entity_extractor is None or _clause_classifier is None:
+        raise HTTPException(status_code=503, detail="Models still loading, try again shortly.")
+
+    suffix = os.path.splitext(file.filename)[1]
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        shutil.copyfileobj(file.file, tmp)
+        tmp_path = tmp.name
+
+    try:
+        raw_text = extract_text(tmp_path)
+    except UnsupportedFileTypeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        os.remove(tmp_path)
+
+    text = clean_text(raw_text)
+    entities = _entity_extractor.extract(text)
+    clause_texts = split_into_clauses(text)
+    offsets = []
+    cursor = 0
+    for c in clause_texts:
+        start = text.find(c, cursor)
+        start = start if start != -1 else cursor
+        end = start + len(c)
+        offsets.append((start, end))
+        cursor = end
+
+    clauses = _clause_classifier.classify(clause_texts, offsets)
+    risk_flags = flag_risks(clauses)
+
+    analysis = DocumentAnalysis(
+        document_id=str(uuid.uuid4()),
+        filename=file.filename,
+        raw_text_length=len(text),
+        entities=entities,
+        clauses=clauses,
+        risk_flags=risk_flags,
+    )
+
+    pdf_bytes = generate_pdf_report(analysis)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{file.filename}_risk_report.pdf"'},
+    )
+
+
+@app.post("/ask")
+async def ask_contract_question(req: QuestionRequest):
+    """Answer a plain-language question about a contract's clauses using an LLM."""
+    try:
+        answer = ask_question(req.clause_texts, req.question)
+        return {"status": "success", "answer": answer}
+    except QAUnavailableError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+
+# Serves frontend/index.html at http://127.0.0.1:8000/
+# Mounted last so it doesn't shadow the API routes above.
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
