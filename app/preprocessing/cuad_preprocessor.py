@@ -1,11 +1,3 @@
-"""
-Week 1 module: CUAD dataset preprocessing.
-
-Converts the nested CUAD/SQuAD-style JSON dataset into
-flat JSONL records that can be used by downstream NLP
-and transformer training pipelines.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -14,11 +6,11 @@ from pathlib import Path
 from typing import Any
 
 
-def load_cuad(input_path: str | Path) -> dict[str, Any]:
-    """
-    Load and validate a CUAD JSON dataset.
-    """
+class CUADSpanValidationError(ValueError):
+    """Raised when an annotated answer does not match its context span."""
 
+
+def load_cuad(input_path: str | Path) -> dict[str, Any]:
     path = Path(input_path)
 
     if not path.exists():
@@ -42,77 +34,218 @@ def load_cuad(input_path: str | Path) -> dict[str, Any]:
     return dataset
 
 
+def _validate_answer_span(
+    context: str,
+    text: str,
+    start: int,
+) -> None:
+
+    if not isinstance(start, int) or start < 0:
+        raise CUADSpanValidationError(
+            f"Invalid answer_start={start!r}."
+        )
+
+    end = start + len(text)
+
+    if end > len(context):
+        raise CUADSpanValidationError(
+            f"Answer span [{start}:{end}] "
+            f"exceeds context length {len(context)}."
+        )
+
+    observed = context[start:end]
+
+    if observed != text:
+        raise CUADSpanValidationError(
+            "CUAD answer span mismatch: "
+            f"expected {text!r} at "
+            f"[{start}:{end}], "
+            f"found {observed!r}."
+        )
+
+
 def flatten_cuad(
     dataset: dict[str, Any],
 ) -> list[dict[str, Any]]:
-    """
-    Flatten nested CUAD records.
-
-    Output:
-    One record per question / clause annotation.
-    """
 
     records: list[dict[str, Any]] = []
 
     for contract in dataset.get("data", []):
-        title = contract.get("title", "").strip()
+        title = str(
+            contract.get("title", "")
+        ).strip()
 
-        for paragraph in contract.get("paragraphs", []):
+        paragraphs = (
+            contract.get("paragraphs", [])
+            or []
+        )
+
+        for paragraph in paragraphs:
+
+            # IMPORTANT:
+            # Do not use .strip() here because
+            # answer_start is based on original context.
             context = paragraph.get(
                 "context",
                 "",
-            ).strip()
+            )
 
-            if not context:
+            if (
+                not isinstance(context, str)
+                or not context.strip()
+            ):
                 continue
 
-            for qa in paragraph.get("qas", []):
-                answers = qa.get("answers", []) or []
+            for qa in (
+                paragraph.get("qas", [])
+                or []
+            ):
+
+                answers = (
+                    qa.get("answers", [])
+                    or []
+                )
 
                 answer_texts = []
                 answer_starts = []
 
                 for answer in answers:
+
+                    answer_text = answer.get(
+                        "text",
+                        "",
+                    )
+
+                    answer_start = answer.get(
+                        "answer_start",
+                        -1,
+                    )
+
+                    if not isinstance(
+                        answer_text,
+                        str,
+                    ):
+                        answer_text = str(
+                            answer_text
+                        )
+
                     answer_texts.append(
-                        answer.get("text", "").strip()
+                        answer_text
                     )
 
                     answer_starts.append(
-                        answer.get("answer_start", -1)
+                        answer_start
                     )
 
-                record = {
-                    "id": str(
-                        qa.get("id", "")
-                    ),
-                    "title": title,
-                    "context": context,
-                    "question": qa.get(
-                        "question",
-                        "",
-                    ).strip(),
-                    "answers": {
-                        "text": answer_texts,
-                        "answer_start": answer_starts,
-                    },
-                    "is_impossible": qa.get(
-                        "is_impossible",
-                        len(answers) == 0,
-                    ),
-                }
-
-                records.append(record)
+                records.append(
+                    {
+                        "id": str(
+                            qa.get(
+                                "id",
+                                "",
+                            )
+                        ),
+                        "title": title,
+                        "context": context,
+                        "question": str(
+                            qa.get(
+                                "question",
+                                "",
+                            )
+                        ).strip(),
+                        "answers": {
+                            "text": (
+                                answer_texts
+                            ),
+                            "answer_start": (
+                                answer_starts
+                            ),
+                        },
+                        "is_impossible": (
+                            qa.get(
+                                "is_impossible",
+                                len(answers) == 0,
+                            )
+                        ),
+                    }
+                )
 
     return records
+
+
+def validate_records(
+    records: list[dict[str, Any]],
+) -> dict[str, int]:
+
+    positive_records = 0
+    impossible_records = 0
+    answer_spans = 0
+
+    for record in records:
+
+        context = record["context"]
+
+        texts = (
+            record
+            .get("answers", {})
+            .get("text", [])
+        )
+
+        starts = (
+            record
+            .get("answers", {})
+            .get(
+                "answer_start",
+                [],
+            )
+        )
+
+        if len(texts) != len(starts):
+            raise CUADSpanValidationError(
+                f"Record "
+                f"{record.get('id', '<unknown>')} "
+                "has unequal answer "
+                "text/start counts."
+            )
+
+        if (
+            record.get("is_impossible")
+            or not texts
+        ):
+            impossible_records += 1
+            continue
+
+        positive_records += 1
+
+        for text, start in zip(
+            texts,
+            starts,
+        ):
+
+            _validate_answer_span(
+                context,
+                text,
+                start,
+            )
+
+            answer_spans += 1
+
+    return {
+        "records": len(records),
+        "positive_records": (
+            positive_records
+        ),
+        "impossible_records": (
+            impossible_records
+        ),
+        "answer_spans": answer_spans,
+    }
 
 
 def save_jsonl(
     records: list[dict[str, Any]],
     output_path: str | Path,
 ) -> None:
-    """
-    Save training records as JSON Lines.
-    """
 
     path = Path(output_path)
 
@@ -139,17 +272,22 @@ def save_jsonl(
 def preprocess_cuad(
     input_path: str | Path,
     output_path: str | Path,
+    *,
+    validate_spans: bool = True,
 ) -> int:
-    """
-    Execute the complete CUAD preprocessing pipeline.
 
-    Returns:
-        Number of generated training records.
-    """
+    dataset = load_cuad(
+        input_path
+    )
 
-    dataset = load_cuad(input_path)
+    records = flatten_cuad(
+        dataset
+    )
 
-    records = flatten_cuad(dataset)
+    if validate_spans:
+        validate_records(
+            records
+        )
 
     save_jsonl(
         records,
@@ -159,38 +297,67 @@ def preprocess_cuad(
     return len(records)
 
 
-def main() -> None:
+def main():
+
     parser = argparse.ArgumentParser(
         description=(
             "Convert CUAD JSON into "
-            "training-ready JSONL."
+            "validated training-ready JSONL."
         )
     )
 
     parser.add_argument(
-        "input",
-        help="Path to raw CUAD JSON file",
+        "input"
     )
 
     parser.add_argument(
-        "output",
-        help="Path to processed JSONL file",
+        "output"
+    )
+
+    parser.add_argument(
+        "--skip-span-validation",
+        action="store_true",
     )
 
     args = parser.parse_args()
 
-    count = preprocess_cuad(
-        args.input,
+    dataset = load_cuad(
+        args.input
+    )
+
+    records = flatten_cuad(
+        dataset
+    )
+
+    stats = None
+
+    if not args.skip_span_validation:
+        stats = validate_records(
+            records
+        )
+
+    save_jsonl(
+        records,
         args.output,
     )
 
     print(
-        f"Successfully processed {count} "
-        f"CUAD records."
+        f"Successfully processed "
+        f"{len(records)} CUAD records."
     )
 
+    if stats:
+        print(
+            f"Validated "
+            f"{stats['answer_spans']} "
+            f"answer spans across "
+            f"{stats['positive_records']} "
+            f"positive records."
+        )
+
     print(
-        f"Output saved to: {args.output}"
+        f"Output saved to: "
+        f"{args.output}"
     )
 
 

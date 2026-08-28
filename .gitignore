@@ -5,13 +5,14 @@ venv/
 .env
 *.log
 
-# sample_contracts/ is tracked intentionally
-# -- these are test fixtures for the team
-
 .DS_Store
 .pytest_cache/
 *.egg-info/
 
-# CUAD dataset
+# CUAD raw/generated dataset
 data/cuad/raw/
 data/cuad/processed/
+
+# ML generated artifacts
+models/
+outputs/

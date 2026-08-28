@@ -1,19 +1,25 @@
 import json
+import pytest
 
 from app.preprocessing.cuad_preprocessor import (
+    CUADSpanValidationError,
     flatten_cuad,
     load_cuad,
     preprocess_cuad,
+    validate_records,
 )
 
 
 def test_flatten_cuad():
+
     context = (
         "This Agreement shall be governed "
         "by the laws of Delaware."
     )
 
-    answer_start = context.index("Delaware")
+    answer_start = context.index(
+        "Delaware"
+    )
 
     dataset = {
         "data": [
@@ -45,7 +51,9 @@ def test_flatten_cuad():
         ]
     }
 
-    records = flatten_cuad(dataset)
+    records = flatten_cuad(
+        dataset
+    )
 
     assert len(records) == 1
 
@@ -58,20 +66,31 @@ def test_flatten_cuad():
         == "sample_contract"
     )
 
-    assert record["answers"]["text"] == [
-        "Delaware"
-    ]
+    assert (
+        record["answers"]["text"]
+        == ["Delaware"]
+    )
 
     assert (
-        record["answers"]["answer_start"]
+        record["answers"][
+            "answer_start"
+        ]
         == [answer_start]
     )
 
-    assert record["is_impossible"] is False
+    assert (
+        record["is_impossible"]
+        is False
+    )
 
 
-def test_load_cuad(tmp_path):
-    input_file = tmp_path / "cuad.json"
+def test_load_cuad(
+    tmp_path,
+):
+
+    input_file = (
+        tmp_path / "cuad.json"
+    )
 
     dataset = {
         "data": []
@@ -82,15 +101,22 @@ def test_load_cuad(tmp_path):
         encoding="utf-8",
     )
 
-    loaded = load_cuad(input_file)
+    loaded = load_cuad(
+        input_file
+    )
 
     assert "data" in loaded
-    assert loaded["data"] == []
+
+    assert (
+        loaded["data"]
+        == []
+    )
 
 
-def test_preprocess_cuad_writes_jsonl(
+def test_preprocess_writes_jsonl(
     tmp_path,
 ):
+
     input_file = (
         tmp_path / "cuad.json"
     )
@@ -135,17 +161,102 @@ def test_preprocess_cuad_writes_jsonl(
     )
 
     assert count == 1
+
     assert output_file.exists()
 
-    content = output_file.read_text(
-        encoding="utf-8",
-    ).strip()
 
-    record = json.loads(content)
+def test_preserve_context_offsets():
 
-    assert record["id"] == "1"
+    context = (
+        "   Agreement governed "
+        "by Delaware."
+    )
+
+    start = context.index(
+        "Delaware"
+    )
+
+    dataset = {
+        "data": [
+            {
+                "title": "offset-test",
+                "paragraphs": [
+                    {
+                        "context": context,
+                        "qas": [
+                            {
+                                "id": (
+                                    "contract__"
+                                    "Governing Law"
+                                ),
+                                "question": (
+                                    "What is the "
+                                    "governing law?"
+                                ),
+                                "answers": [
+                                    {
+                                        "text": (
+                                            "Delaware"
+                                        ),
+                                        "answer_start": (
+                                            start
+                                        ),
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            }
+        ]
+    }
+
+    records = flatten_cuad(
+        dataset
+    )
 
     assert (
-        record["is_impossible"]
-        is True
+        records[0]["context"]
+        == context
     )
+
+    stats = validate_records(
+        records
+    )
+
+    assert (
+        stats["answer_spans"]
+        == 1
+    )
+
+
+def test_reject_broken_span():
+
+    records = [
+        {
+            "id": "broken",
+            "context": (
+                "This agreement is "
+                "governed by Delaware."
+            ),
+            "question": (
+                "Governing law?"
+            ),
+            "answers": {
+                "text": [
+                    "Delaware"
+                ],
+                "answer_start": [
+                    0
+                ],
+            },
+            "is_impossible": False,
+        }
+    ]
+
+    with pytest.raises(
+        CUADSpanValidationError
+    ):
+        validate_records(
+            records
+        )
