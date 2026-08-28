@@ -17,11 +17,11 @@ def _ocr_pdf_page(file_path: str, page_number: int, dpi: int = 300) -> str:
     try:
         import pytesseract
         from pdf2image import convert_from_path
-    except ImportError as exc:
-        raise RuntimeError(
-            "OCR dependencies are missing. Install requirements.txt before "
-            "processing scanned PDFs."
-        ) from exc
+    except ImportError:
+        # OCR dependencies aren't installed -- skip this page instead of
+        # crashing the whole request. The rest of the document (any pages
+        # with regular extractable text) will still process normally.
+        return "" 
 
     images = convert_from_path(
         file_path,
