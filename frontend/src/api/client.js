@@ -95,10 +95,19 @@ export async function analyzeContract(file) {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await fetch('/analyze', {
-    method: 'POST',
-    body: formData,
-  });
+  let res;
+  try {
+    res = await fetch('/analyze', {
+      method: 'POST',
+      body: formData,
+    });
+  } catch (networkErr) {
+    throw new Error(
+      'Cannot reach the backend server. Please start it with:\n' +
+      '  uvicorn app.main:app --reload\n' +
+      'Then try again. (Backend must be running on port 8000)'
+    );
+  }
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({}));
@@ -119,10 +128,15 @@ export async function downloadPdfReport(file) {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await fetch('/analyze/pdf-report', {
-    method: 'POST',
-    body: formData,
-  });
+  let res;
+  try {
+    res = await fetch('/analyze/pdf-report', {
+      method: 'POST',
+      body: formData,
+    });
+  } catch (networkErr) {
+    throw new Error('Backend server is not reachable. Please ensure uvicorn is running on port 8000.');
+  }
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({}));
@@ -156,11 +170,16 @@ export async function askContractQuestion(clauseTexts, question) {
       : 'I found relevant provisions in the contract that address your question. Please review the highlighted clauses for detailed information.'}`;
   }
 
-  const res = await fetch('/ask', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, clause_texts: clauseTexts }),
-  });
+  let res;
+  try {
+    res = await fetch('/ask', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, clause_texts: clauseTexts }),
+    });
+  } catch (networkErr) {
+    throw new Error('Backend server is not reachable. Please ensure uvicorn is running on port 8000.');
+  }
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({}));

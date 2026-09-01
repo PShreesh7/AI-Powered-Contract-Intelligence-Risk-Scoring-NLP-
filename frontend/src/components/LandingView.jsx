@@ -118,7 +118,24 @@ export default function LandingView({ onUpload, error }) {
           {error && (
             <div className="error-banner" style={{ marginTop: '16px', maxWidth: '540px' }}>
               <span className="error-icon">⚠️</span>
-              <span>{error}</span>
+              <div>
+                <div style={{ marginBottom: error.includes('uvicorn') ? '8px' : 0 }}>{error.split('\n')[0]}</div>
+                {error.includes('uvicorn') && (
+                  <code style={{
+                    display: 'block',
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '4px',
+                    padding: '6px 10px',
+                    fontSize: '11px',
+                    fontFamily: 'var(--font-mono)',
+                    color: 'var(--gold-bright)',
+                    whiteSpace: 'pre',
+                  }}>
+                    {error.split('\n').slice(1).join('\n')}
+                  </code>
+                )}
+              </div>
             </div>
           )}
         </div>
