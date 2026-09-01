@@ -6,12 +6,14 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Forward API calls to the FastAPI/Flask backend during development.
-      // Adjust target to match wherever text_utils.py's server is running.
-      '/api': {
-        target: 'http://localhost:8000',
-        changeOrigin: true
-      }
+      // Forward all backend routes to FastAPI during development.
+      '/analyze': { target: 'http://localhost:8000', changeOrigin: true },
+      '/ask':     { target: 'http://localhost:8000', changeOrigin: true },
+      '/health':  { target: 'http://localhost:8000', changeOrigin: true },
     }
+  },
+  build: {
+    outDir: '../dist',   // build goes to legal-nlp-platform/dist
+    emptyOutDir: true,
   }
 })

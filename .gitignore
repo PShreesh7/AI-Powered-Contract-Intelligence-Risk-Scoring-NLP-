@@ -5,6 +5,16 @@ venv/
 .env
 *.log
 
+# sample_contracts/ is tracked intentionally
+# -- these are test fixtures for the team
+
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+dist/
+node_modules/
+*.local
+
 .DS_Store
 .pytest_cache/
 *.egg-info/

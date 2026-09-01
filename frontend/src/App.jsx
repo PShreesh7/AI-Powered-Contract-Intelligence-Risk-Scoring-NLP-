@@ -1,76 +1,54 @@
-import { useState } from 'react';
-import Header from './components/Header.jsx';
-import ContractViewer from './components/ContractViewer.jsx';
-import ClauseList from './components/ClauseList.jsx';
-import RiskGauge from './components/RiskGauge.jsx';
+import { useState, useCallback } from 'react';
+import LandingView from './components/LandingView.jsx';
+import AnalysisDashboard from './components/AnalysisDashboard.jsx';
+import LoadingOverlay from './components/LoadingOverlay.jsx';
 import { analyzeContract } from './api/client.js';
 
 export default function App() {
-  const [fileName, setFileName] = useState(null);
-  const [analysis, setAnalysis] = useState(null);
-  const [selectedClauseId, setSelectedClauseId] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [view, setView]           = useState('landing');   // 'landing' | 'dashboard'
+  const [file, setFile]           = useState(null);
+  const [analysis, setAnalysis]   = useState(null);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState(null);
 
-  async function handleUpload(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileName(file.name);
+  const handleUpload = useCallback(async (selectedFile) => {
+    if (!selectedFile) return;
+    setFile(selectedFile);
     setLoading(true);
     setError(null);
     try {
-      const result = await analyzeContract(file);
+      const result = await analyzeContract(selectedFile);
       setAnalysis(result);
-      setSelectedClauseId(null);
+      setView('dashboard');
     } catch (err) {
       setError(err.message || 'Something went wrong analyzing this contract.');
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  function handleSelectClause(id) {
-    setSelectedClauseId(id);
-    const el = document.getElementById(`clause-${id}`);
-    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  const handleNewAnalysis = useCallback(() => {
+    setView('landing');
+    setFile(null);
+    setAnalysis(null);
+    setError(null);
+  }, []);
 
   return (
-    <div className="app-shell">
-      <Header fileName={fileName} onUpload={handleUpload} />
+    <>
+      {loading && <LoadingOverlay />}
 
-      <main className="app-main">
-        <section className="viewer-pane">
-          {loading && <div className="status-line">Analyzing contract…</div>}
-          {error && <div className="status-line status-error">{error}</div>}
-          {!loading && (
-            <ContractViewer
-              fullText={analysis?.fullText}
-              clauses={analysis?.clauses || []}
-              selectedClauseId={selectedClauseId}
-              onSelectClause={handleSelectClause}
-            />
-          )}
-        </section>
+      {view === 'landing' && (
+        <LandingView onUpload={handleUpload} error={error} />
+      )}
 
-        <aside className="side-pane">
-          {analysis ? (
-            <>
-              <RiskGauge score={analysis.overallRisk} />
-              <h2 className="side-heading">Flagged clauses ({analysis.clauses.length})</h2>
-              <ClauseList
-                clauses={analysis.clauses}
-                selectedClauseId={selectedClauseId}
-                onSelectClause={handleSelectClause}
-              />
-            </>
-          ) : (
-            <div className="side-empty">
-              <p>Risk score and flagged clauses will appear here once a contract is analyzed.</p>
-            </div>
-          )}
-        </aside>
-      </main>
-    </div>
+      {view === 'dashboard' && analysis && (
+        <AnalysisDashboard
+          analysis={analysis}
+          file={file}
+          onNewAnalysis={handleNewAnalysis}
+        />
+      )}
+    </>
   );
 }
