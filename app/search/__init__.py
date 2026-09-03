@@ -6,6 +6,11 @@ from app.search.embeddings import (
     EmbeddingService,
 )
 
+from app.search.semantic_search import (
+    SemanticSearchResult,
+    SemanticSearchService,
+)
+
 from app.search.vector_store import (
     DEFAULT_DIMENSION,
     DEFAULT_INDEX_NAME,
@@ -26,4 +31,6 @@ __all__ = [
     "PineconeVectorStore",
     "VectorSearchMatch",
     "vector_store_from_environment",
+    "SemanticSearchResult",
+    "SemanticSearchService",
 ]
