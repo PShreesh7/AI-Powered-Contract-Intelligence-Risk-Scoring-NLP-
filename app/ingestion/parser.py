@@ -74,8 +74,17 @@ def extract_text(file_path: str) -> str:
 
     if ext == ".pdf":
         return extract_text_from_pdf(file_path)
-    elif ext in (".docx", ".doc"):
+    # elif ext in (".docx", ".doc"):
+    #     return extract_text_from_docx(file_path)
+
+    elif ext == ".docx":
         return extract_text_from_docx(file_path)
+
+    elif ext == ".doc":
+        raise UnsupportedFileTypeError(
+        "Legacy .doc files are not supported. "
+        "Convert the file to .docx first."
+    )
     else:
         raise UnsupportedFileTypeError(f"Unsupported file type: {ext}")
 
