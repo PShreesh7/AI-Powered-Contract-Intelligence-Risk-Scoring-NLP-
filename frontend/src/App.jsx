@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import LandingView from './components/LandingView.jsx';
 import AnalysisDashboard from './components/AnalysisDashboard.jsx';
 import LoadingOverlay from './components/LoadingOverlay.jsx';
+import Background3D from './components/Background3D.jsx';
 import { analyzeContract } from './api/client.js';
 
 export default function App() {
@@ -36,6 +37,8 @@ export default function App() {
 
   return (
     <>
+      <Background3D />
+
       {loading && <LoadingOverlay />}
 
       {view === 'landing' && (

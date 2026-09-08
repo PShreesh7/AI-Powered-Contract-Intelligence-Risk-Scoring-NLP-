@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    watch: {
+      ignored: ['**/public/**']
+    },
     proxy: {
       // Forward all backend routes to FastAPI during development.
       // Note: using 127.0.0.1 instead of localhost to prevent IPv6 resolution issues on Node

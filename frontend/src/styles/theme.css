@@ -1,153 +1,130 @@
 /* ============================================================
-   LexAI Design System — "Obsidian Legal"
-   A premium dark UI for contract intelligence.
-   Dark glass base + gold accent + precise risk color system.
+   LexAI Design System — "Cinematic 3D Obsidian & Neon"
+   Ultra-modern glassmorphism, 3D perspective elevation, and
+   responsive cybernetic legal intelligence interface.
    ============================================================ */
 
 :root {
-  /* ── Core Palette ── */
-  --bg-void:       #080b12;
-  --bg-deep:       #0d1117;
-  --bg-surface:    #131820;
-  --bg-elevated:   #1a2130;
-  --bg-card:       #1e2736;
-  --bg-hover:      #242f41;
+  /* ── Core Deep Space Palette ── */
+  --bg-void:           #05070c;
+  --bg-deep:           #090d15;
+  --bg-surface:        rgba(15, 21, 33, 0.75);
+  --bg-elevated:       rgba(22, 30, 48, 0.70);
+  --bg-card:           rgba(26, 36, 56, 0.55);
+  --bg-hover:          rgba(36, 50, 78, 0.65);
+  --bg-glass:          rgba(13, 18, 28, 0.72);
 
-  /* Glass / Overlay */
-  --glass-bg:      rgba(30, 39, 54, 0.72);
-  --glass-border:  rgba(255, 255, 255, 0.07);
-  --glass-blur:    20px;
+  /* Glass & Depth */
+  --glass-border:      rgba(255, 255, 255, 0.08);
+  --glass-border-hi:   rgba(255, 255, 255, 0.16);
+  --glass-blur:        16px;
 
-  /* Text */
-  --text-primary:  #edf2f7;
-  --text-secondary:#9bafc4;
-  --text-muted:    #5a6a80;
-  --text-inverse:  #080b12;
+  /* Typography */
+  --font-display:      'Newsreader', Georgia, serif;
+  --font-body:         'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:         'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
 
-  /* Gold Accent (brand) */
-  --gold:          #d4a843;
-  --gold-bright:   #f0c866;
-  --gold-dim:      #8a6c2a;
-  --gold-glow:     rgba(212, 168, 67, 0.25);
+  /* Text Colors */
+  --text-primary:      #f8fafc;
+  --text-secondary:    #cbd5e1;
+  --text-muted:        #64748b;
+  --text-accent:       #f0c866;
 
-  /* Borders & Dividers */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-normal: rgba(255, 255, 255, 0.10);
-  --border-strong: rgba(255, 255, 255, 0.18);
+  /* Brand Accents (Gold & Cyan) */
+  --gold:              #d4a843;
+  --gold-bright:       #f5cb6c;
+  --gold-dim:          #8a6c2a;
+  --gold-glow:         rgba(212, 168, 67, 0.35);
 
-  /* ── Risk Color System ── */
-  --risk-high:        #ff5a5a;
-  --risk-high-deep:   #c73232;
-  --risk-high-bg:     rgba(199, 50, 50, 0.15);
-  --risk-high-border: rgba(255, 90, 90, 0.30);
-  --risk-high-glow:   rgba(255, 90, 90, 0.20);
+  --cyan:              #38bdf8;
+  --cyan-glow:         rgba(56, 189, 248, 0.35);
 
-  --risk-med:         #f5a623;
-  --risk-med-deep:    #b87312;
-  --risk-med-bg:      rgba(184, 115, 18, 0.15);
-  --risk-med-border:  rgba(245, 166, 35, 0.30);
-  --risk-med-glow:    rgba(245, 166, 35, 0.20);
+  /* ── Dynamic Risk Spectrum ── */
+  --risk-high:         #ff4d4d;
+  --risk-high-deep:    #cc2929;
+  --risk-high-bg:      rgba(255, 77, 77, 0.12);
+  --risk-high-border:  rgba(255, 77, 77, 0.35);
+  --risk-high-glow:    rgba(255, 77, 77, 0.35);
 
-  --risk-low:         #34d399;
-  --risk-low-deep:    #0d9a6a;
-  --risk-low-bg:      rgba(13, 154, 106, 0.12);
-  --risk-low-border:  rgba(52, 211, 153, 0.28);
-  --risk-low-glow:    rgba(52, 211, 153, 0.15);
+  --risk-med:          #ffa600;
+  --risk-med-deep:     #cc8400;
+  --risk-med-bg:       rgba(255, 166, 0, 0.12);
+  --risk-med-border:   rgba(255, 166, 0, 0.35);
+  --risk-med-glow:     rgba(255, 166, 0, 0.30);
 
-  /* Entity colors */
-  --ent-party:     #818cf8;
-  --ent-party-bg:  rgba(129, 140, 248, 0.12);
-  --ent-date:      #38bdf8;
-  --ent-date-bg:   rgba(56, 189, 248, 0.10);
-  --ent-money:     #34d399;
-  --ent-money-bg:  rgba(52, 211, 153, 0.10);
-  --ent-jur:       #fb923c;
-  --ent-jur-bg:    rgba(251, 146, 60, 0.10);
-  --ent-org:       #c084fc;
-  --ent-org-bg:    rgba(192, 132, 252, 0.10);
-  --ent-other:     #94a3b8;
-  --ent-other-bg:  rgba(148, 163, 184, 0.10);
+  --risk-low:          #00e699;
+  --risk-low-deep:     #00b377;
+  --risk-low-bg:       rgba(0, 230, 153, 0.10);
+  --risk-low-border:   rgba(0, 230, 153, 0.35);
+  --risk-low-glow:     rgba(0, 230, 153, 0.28);
 
-  /* ── Typography ── */
-  --font-display:  'Newsreader', Georgia, serif;
-  --font-body:     'Inter', -apple-system, sans-serif;
-  --font-mono:     'IBM Plex Mono', ui-monospace, monospace;
+  /* Entity Palette */
+  --ent-party:         #818cf8;
+  --ent-party-bg:      rgba(129, 140, 248, 0.14);
+  --ent-date:          #38bdf8;
+  --ent-date-bg:       rgba(56, 189, 248, 0.12);
+  --ent-money:         #00e699;
+  --ent-money-bg:      rgba(0, 230, 153, 0.12);
+  --ent-jur:           #fb923c;
+  --ent-jur-bg:        rgba(251, 146, 60, 0.12);
+  --ent-org:           #c084fc;
+  --ent-org-bg:        rgba(192, 132, 252, 0.12);
 
-  /* ── Layout ── */
-  --header-h:      64px;
-  --sidebar-w:     400px;
-  --radius-xs:     4px;
-  --radius-sm:     6px;
-  --radius-md:     10px;
-  --radius-lg:     16px;
-  --radius-xl:     24px;
-  --radius-full:   9999px;
+  /* Radii */
+  --radius-xs:         4px;
+  --radius-sm:         8px;
+  --radius-md:         12px;
+  --radius-lg:         18px;
+  --radius-xl:         24px;
+  --radius-full:       9999px;
 
-  /* ── Shadows ── */
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.4);
-  --shadow-md:   0 4px 16px rgba(0,0,0,0.5);
-  --shadow-lg:   0 8px 32px rgba(0,0,0,0.6);
-  --shadow-glow-gold: 0 0 24px rgba(212, 168, 67, 0.3);
+  /* Shadows */
+  --shadow-sm:         0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md:         0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg:         0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glass:      0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --shadow-glow-gold:  0 0 28px rgba(212, 168, 67, 0.35);
 
-  /* ── Animations ── */
-  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --dur-fast:    150ms;
-  --dur-base:    250ms;
-  --dur-slow:    400ms;
+  /* Transitions */
+  --ease-out:          cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:          160ms;
+  --dur-base:          280ms;
+  --dur-slow:          420ms;
 }
 
-/* ── Reset & Base ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* Base resets & typography */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 html, body, #root {
+  width: 100%;
   height: 100%;
-  background: var(--bg-void);
+  min-height: 100vh;
+  background-color: var(--bg-void);
   color: var(--text-primary);
   font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-body { overflow-x: hidden; }
-
-button, input, textarea, select { font-family: inherit; }
-
-a { color: var(--gold); text-decoration: none; }
-a:hover { color: var(--gold-bright); }
-
-button:focus-visible,
-[tabindex]:focus-visible,
-a:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
+/* Custom cyber scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-
-/* ── Scrollbar Styling ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg-deep); }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-full); }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-/* ── Utility Classes ── */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
 }
-
-.gradient-text {
-  background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
 }
-
-/* ── Motion Preferences ── */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 168, 67, 0.4);
 }

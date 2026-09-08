@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FileDown, PlusCircle, Scale, FileText, Loader2, Sparkles } from 'lucide-react';
 import { downloadPdfReport } from '../api/client.js';
 
 export default function DashboardHeader({ filename, file, overallRisk, onNewAnalysis }) {
@@ -18,67 +19,84 @@ export default function DashboardHeader({ filename, file, overallRisk, onNewAnal
     }
   }
 
-  const riskColor = overallRisk >= 70 ? 'var(--risk-high)'
-                  : overallRisk >= 40 ? 'var(--risk-med)'
-                  : 'var(--risk-low)';
+  const riskColor =
+    overallRisk >= 70
+      ? '#ff4d4d'
+      : overallRisk >= 40
+      ? '#ffa600'
+      : '#00e699';
 
   return (
-    <header className="dash-header">
+    <header className="dash-header-3d">
       {/* Brand */}
-      <a href="#" className="dash-brand" onClick={e => { e.preventDefault(); onNewAnalysis(); }} aria-label="Go to LexAI home">
-        <div className="dash-brand-icon">⚖️</div>
-        <span className="dash-brand-name">Lex<em>AI</em></span>
+      <a
+        href="#"
+        className="brand-link"
+        onClick={(e) => {
+          e.preventDefault();
+          onNewAnalysis();
+        }}
+        aria-label="Go to LexAI home"
+      >
+        <div className="brand-logo-gem">
+          <Scale size={20} className="gem-icon" />
+          <div className="gem-glow" />
+        </div>
+        <div className="brand-text">
+          <span className="brand-name">Lex<span className="brand-ai">AI</span></span>
+          <span className="brand-tagline">INTELLIGENCE</span>
+        </div>
       </a>
 
-      <div className="dash-divider" aria-hidden="true" />
+      <div className="header-v-divider" />
 
-      {/* File name */}
-      <div className="dash-filename">
-        <span className="filename-icon">📄</span>
-        <span className="filename-text" title={filename}>{filename}</span>
+      {/* Contract File Tag */}
+      <div className="contract-pill">
+        <FileText size={15} className="file-icon" />
+        <span className="filename" title={filename}>{filename}</span>
+        <span className="file-status-dot" />
       </div>
 
-      {/* Risk pill */}
+      {/* Dynamic Risk Tag */}
       <div
+        className="risk-hud-pill"
         style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '12px',
+          borderColor: `${riskColor}55`,
+          background: `${riskColor}12`,
           color: riskColor,
-          background: `${riskColor}18`,
-          border: `1px solid ${riskColor}44`,
-          borderRadius: 'var(--radius-full)',
-          padding: '4px 12px',
-          flexShrink: 0,
-          letterSpacing: '0.04em',
+          boxShadow: `0 0 16px ${riskColor}28`,
         }}
-        aria-label={`Overall risk score: ${overallRisk}`}
       >
-        Risk {overallRisk}/100
+        <span className="hud-label">RISK INDEX</span>
+        <span className="hud-val">{overallRisk}</span>
+        <span className="hud-max">/100</span>
       </div>
 
-      {/* Actions */}
-      <div className="dash-actions">
-        {dlError && (
-          <span style={{ fontSize: '12px', color: 'var(--risk-high)' }} title={dlError}>
-            ⚠ PDF failed
-          </span>
-        )}
+      {/* Action Buttons */}
+      <div className="header-actions">
+        {dlError && <span className="dl-error-toast">{dlError}</span>}
+
         <button
-          id="download-pdf-btn"
-          className="btn btn-ghost"
+          className="btn-glass-report"
           onClick={handleDownloadPdf}
           disabled={downloading || !file}
-          aria-label="Download PDF risk report"
+          title="Export complete legal risk assessment as PDF"
         >
-          {downloading ? '⏳' : '⬇️'} {downloading ? 'Generating…' : 'PDF Report'}
+          {downloading ? (
+            <Loader2 size={16} className="spin-icon" />
+          ) : (
+            <FileDown size={16} />
+          )}
+          <span>{downloading ? 'Generating PDF…' : 'PDF Report'}</span>
         </button>
+
         <button
-          id="new-analysis-btn"
-          className="btn btn-primary"
+          className="btn-cinematic-cta"
           onClick={onNewAnalysis}
-          aria-label="Start a new contract analysis"
+          title="Upload and analyze another contract"
         >
-          + New Analysis
+          <PlusCircle size={16} />
+          <span>New Analysis</span>
         </button>
       </div>
     </header>

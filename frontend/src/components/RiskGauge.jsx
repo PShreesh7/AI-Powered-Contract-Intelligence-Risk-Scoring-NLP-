@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import confetti from 'canvas-confetti';
+import { ShieldCheck, ShieldAlert, AlertTriangle, Sparkles } from 'lucide-react';
+import Card3D from './Card3D.jsx';
 
-const START_ANGLE = -210; // degrees, 0° = pointing right
-const SWEEP       = 240;
+const START_ANGLE = -215;
+const SWEEP = 250;
 
 function polar(cx, cy, r, deg) {
   const rad = (deg * Math.PI) / 180;
@@ -16,115 +19,243 @@ function arc(cx, cy, r, startDeg, endDeg) {
   return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`;
 }
 
-const BANDS = [
-  { from: 0,  to: 40,  color: 'var(--risk-low)',  glow: 'var(--risk-low-glow)' },
-  { from: 40, to: 70,  color: 'var(--risk-med)',  glow: 'var(--risk-med-glow)' },
-  { from: 70, to: 100, color: 'var(--risk-high)', glow: 'var(--risk-high-glow)' },
-];
-
-function riskLabel(score) {
-  if (score >= 70) return { text: 'High Risk',    cls: 'high', color: 'var(--risk-high)' };
-  if (score >= 40) return { text: 'Medium Risk',  cls: 'med',  color: 'var(--risk-med)' };
-  return               { text: 'Low Risk',        cls: 'low',  color: 'var(--risk-low)' };
+function getRiskMeta(score) {
+  if (score >= 70) {
+    return {
+      text: 'HIGH RISK',
+      subtext: 'Critical clauses require immediate review',
+      cls: 'high',
+      color: '#ff4d4d',
+      glow: 'rgba(255, 77, 77, 0.45)',
+      gradient: ['#ff4d4d', '#ff1a75'],
+      Icon: ShieldAlert,
+    };
+  }
+  if (score >= 40) {
+    return {
+      text: 'MODERATE RISK',
+      subtext: 'Several clauses contain discretionary terms',
+      cls: 'med',
+      color: '#ffa600',
+      glow: 'rgba(255, 166, 0, 0.40)',
+      gradient: ['#ffa600', '#ff7700'],
+      Icon: AlertTriangle,
+    };
+  }
+  return {
+    text: 'LOW RISK',
+    subtext: 'Standard commercial terms with low exposure',
+    cls: 'low',
+    color: '#00e699',
+    glow: 'rgba(0, 230, 153, 0.40)',
+    gradient: ['#00e699', '#00b386'],
+    Icon: ShieldCheck,
+  };
 }
 
 export default function RiskGauge({ score = 0 }) {
-  const cx = 110, cy = 110, r = 80;
+  const cx = 130;
+  const cy = 125;
+  const r = 90;
 
-  // Animate score counting up
   const [displayScore, setDisplayScore] = useState(0);
   const frameRef = useRef(null);
 
   useEffect(() => {
-    const duration  = 1200; // ms
-    const start     = performance.now();
-    const startVal  = 0;
+    const duration = 1400;
+    const start = performance.now();
 
     function step(now) {
       const t = Math.min((now - start) / duration, 1);
-      // ease-out cubic
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplayScore(Math.round(startVal + eased * (score - startVal)));
+      const eased = 1 - Math.pow(1 - t, 4); // Quartic ease-out
+      setDisplayScore(Math.round(eased * score));
       if (t < 1) frameRef.current = requestAnimationFrame(step);
     }
     frameRef.current = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frameRef.current);
   }, [score]);
 
-  const needleAngle   = START_ANGLE + (SWEEP * displayScore) / 100;
-  const needleTip     = polar(cx, cy, r - 14, needleAngle);
-  const needleBase1   = polar(cx, cy, 8, needleAngle + 90);
-  const needleBase2   = polar(cx, cy, 8, needleAngle - 90);
-  const { text, cls, color } = riskLabel(score);
+  const meta = getRiskMeta(score);
+  const progressDeg = START_ANGLE + (SWEEP * Math.min(Math.max(displayScore, 0), 100)) / 100;
+  const needleTip = polar(cx, cy, r - 10, progressDeg);
+  const needleP1 = polar(cx, cy, 10, progressDeg + 90);
+  const needleP2 = polar(cx, cy, 10, progressDeg - 90);
 
-  // Active band for glow
-  const activeBand = BANDS.find(b => score > b.from && score <= b.to) ?? BANDS[2];
+  const handleCelebrate = () => {
+    if (score < 40) {
+      confetti({
+        particleCount: 70,
+        spread: 60,
+        origin: { y: 0.7 },
+        colors: ['#00e699', '#38bdf8', '#d4a843'],
+      });
+    }
+  };
 
   return (
-    <div className="gauge-container">
-      <svg
-        viewBox="0 0 220 190"
-        className="gauge-svg"
-        role="img"
-        aria-label={`Overall risk score ${score} out of 100: ${text}`}
-      >
-        <defs>
-          <filter id="needle-glow">
-            <feGaussianBlur stdDeviation="2" result="blur" />
-            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
-          <filter id="band-glow">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
-        </defs>
+    <Card3D
+      className="gauge-3d-card"
+      maxTilt={6}
+      scale={1.01}
+      onClick={handleCelebrate}
+      style={{
+        cursor: 'pointer',
+        boxShadow: `0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px ${meta.glow}`,
+      }}
+    >
+      <div className="gauge-3d-header">
+        <div className="gauge-status-badge" style={{ borderColor: meta.color, color: meta.color }}>
+          <meta.Icon size={14} />
+          <span>RISK RADAR HUD</span>
+        </div>
+        <div className="gauge-live-indicator">
+          <span className="live-dot" style={{ background: meta.color, boxShadow: `0 0 8px ${meta.color}` }} />
+          <span>REAL-TIME NLP</span>
+        </div>
+      </div>
 
-        {/* Track */}
-        <path
-          d={arc(cx, cy, r, START_ANGLE, START_ANGLE + SWEEP)}
-          className="gauge-track"
-          strokeWidth="12"
-          fill="none"
-        />
+      <div className="gauge-interactive-stage">
+        <svg
+          viewBox="0 0 260 215"
+          className="gauge-svg-3d"
+          role="img"
+          aria-label={`Overall risk score ${score} out of 100: ${meta.text}`}
+        >
+          <defs>
+            <linearGradient id="trackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#00e699" />
+              <stop offset="50%" stopColor="#ffa600" />
+              <stop offset="100%" stopColor="#ff4d4d" />
+            </linearGradient>
 
-        {/* Colored bands */}
-        {BANDS.map(b => (
-          <path
-            key={b.from}
-            d={arc(cx, cy, r, START_ANGLE + (SWEEP * b.from) / 100, START_ANGLE + (SWEEP * b.to) / 100)}
+            <linearGradient id="activeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={meta.gradient[0]} />
+              <stop offset="100%" stopColor={meta.gradient[1]} />
+            </linearGradient>
+
+            <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur1" />
+              <feGaussianBlur stdDeviation="8" result="blur2" />
+              <feMerge>
+                <feMergeNode in="blur2" />
+                <feMergeNode in="blur1" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+
+            <radialGradient id="hubRadial" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor={meta.color} stopOpacity="0.8" />
+              <stop offset="60%" stopColor="rgba(15, 23, 42, 0.9)" />
+              <stop offset="100%" stopColor="#0a0e17" />
+            </radialGradient>
+          </defs>
+
+          {/* Outer Bezel Tech Ring */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r={r + 18}
             fill="none"
-            stroke={b.color}
-            strokeWidth="12"
-            strokeLinecap="butt"
-            opacity="0.7"
-            filter={score > b.from && score <= b.to ? 'url(#band-glow)' : undefined}
+            stroke="rgba(255, 255, 255, 0.05)"
+            strokeWidth="2"
+            strokeDasharray="4 8"
           />
-        ))}
 
-        {/* Needle */}
-        <polygon
-          points={`${needleTip.x},${needleTip.y} ${needleBase1.x},${needleBase1.y} ${needleBase2.x},${needleBase2.y}`}
-          fill={color}
-          opacity="0.95"
-          filter="url(#needle-glow)"
-          className="gauge-needle"
-        />
-        {/* Needle hub */}
-        <circle cx={cx} cy={cy} r="6" fill={color} opacity="0.9" />
-        <circle cx={cx} cy={cy} r="3" fill="var(--bg-card)" />
+          {/* Background Track Arc */}
+          <path
+            d={arc(cx, cy, r, START_ANGLE, START_ANGLE + SWEEP)}
+            fill="none"
+            stroke="rgba(255, 255, 255, 0.08)"
+            strokeWidth="14"
+            strokeLinecap="round"
+          />
 
-        {/* Score display */}
-        <text x={cx} y={cy + 34} textAnchor="middle" className="gauge-score-num"
-          style={{ fontFamily: 'var(--font-display)', fontSize: '44px', fill: 'var(--text-primary)' }}>
-          {displayScore}
-        </text>
-        <text x={cx} y={cy + 52} textAnchor="middle" className="gauge-score-denom"
-          style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fill: 'var(--text-muted)' }}>
-          / 100
-        </text>
-      </svg>
+          {/* Ambient Multi-spectrum Underlay */}
+          <path
+            d={arc(cx, cy, r, START_ANGLE, START_ANGLE + SWEEP)}
+            fill="none"
+            stroke="url(#trackGrad)"
+            strokeWidth="3"
+            strokeOpacity="0.35"
+            strokeLinecap="round"
+          />
 
-      <div className={`gauge-verdict ${cls}`}>{text}</div>
-    </div>
+          {/* Active Dynamic Progress Arc */}
+          {displayScore > 0 && (
+            <path
+              d={arc(cx, cy, r, START_ANGLE, progressDeg)}
+              fill="none"
+              stroke="url(#activeGrad)"
+              strokeWidth="14"
+              strokeLinecap="round"
+              filter="url(#neonGlow)"
+            />
+          )}
+
+          {/* Center Holographic Core Ring */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r="44"
+            fill="url(#hubRadial)"
+            stroke="rgba(255, 255, 255, 0.12)"
+            strokeWidth="1.5"
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r="38"
+            fill="none"
+            stroke={meta.color}
+            strokeWidth="1"
+            strokeOpacity="0.4"
+            strokeDasharray="6 4"
+            className="pulse-spin"
+          />
+
+          {/* Needle Indicator */}
+          <polygon
+            points={`${needleTip.x},${needleTip.y} ${needleP1.x},${needleP1.y} ${needleP2.x},${needleP2.y}`}
+            fill={meta.color}
+            filter="url(#neonGlow)"
+            opacity="0.95"
+          />
+
+          {/* Central Score HUD Typography */}
+          <text
+            x={cx}
+            y={cy + 6}
+            textAnchor="middle"
+            className="gauge-hud-score"
+            style={{ fill: '#ffffff', filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.4))' }}
+          >
+            {displayScore}
+          </text>
+          <text
+            x={cx}
+            y={cy + 22}
+            textAnchor="middle"
+            className="gauge-hud-sub"
+            style={{ fill: 'var(--text-muted)' }}
+          >
+            / 100
+          </text>
+        </svg>
+
+        {/* Verdict Badge */}
+        <div
+          className="gauge-verdict-banner"
+          style={{
+            background: `linear-gradient(135deg, ${meta.color}18, rgba(13, 17, 23, 0.8))`,
+            borderColor: `${meta.color}44`,
+          }}
+        >
+          <div className="verdict-title" style={{ color: meta.color }}>
+            {meta.text}
+          </div>
+          <div className="verdict-subtext">{meta.subtext}</div>
+        </div>
+      </div>
+    </Card3D>
   );
 }
