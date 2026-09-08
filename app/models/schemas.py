@@ -228,3 +228,13 @@ class SearchStatsResponse(
     ] = Field(
         default_factory=dict
     )
+
+
+class AskRequest(BaseModel):
+    question: str
+    clause_texts: List[str]
+
+
+class AskResponse(BaseModel):
+    status: str
+    answer: str

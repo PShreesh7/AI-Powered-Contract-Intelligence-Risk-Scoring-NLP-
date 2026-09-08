@@ -24,5 +24,5 @@ data/cuad/raw/
 data/cuad/processed/
 
 # ML generated artifacts
-models/
+/models/
 outputs/

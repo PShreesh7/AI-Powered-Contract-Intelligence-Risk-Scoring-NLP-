@@ -4,7 +4,7 @@ Extracts raw text from PDF and DOCX contract files.
 """
 from __future__ import annotations
 import os
-import fitz  # PyMuPDF
+import pymupdf as fitz
 import docx  # python-docx
 
 MIN_TEXT_CHARS_PER_PAGE = 20
