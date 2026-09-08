@@ -8,6 +8,13 @@ import shutil
 import tempfile
 from typing import Any
 
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
+
 from fastapi import (
     FastAPI,
     File,

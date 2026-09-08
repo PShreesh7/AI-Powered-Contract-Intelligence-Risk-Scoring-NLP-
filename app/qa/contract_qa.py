@@ -14,7 +14,12 @@ Setup:
 """
 from __future__ import annotations
 import os
-from typing import List
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
 
 MAX_CONTEXT_CHARS = 12000  # keep prompts small -- most contracts easily fit
 
@@ -62,13 +67,31 @@ def ask_question(clause_texts: List[str], question: str) -> str:
         ) from e
 
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-1.5-flash")  # fast + free-tier friendly
 
     context = build_context(clause_texts)
     prompt = build_prompt(context, question)
 
-    response = model.generate_content(prompt)
-    return response.text.strip()
+    candidate_models = []
+    preferred = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
+    for m in [preferred, "gemini-3.6-flash", "gemini-3.7-flash", "gemini-3.5-flash", "gemini-flash-latest"]:
+        if m and m not in candidate_models:
+            candidate_models.append(m)
+
+    last_error = None
+    for model_name in candidate_models:
+        try:
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            if response and response.text:
+                return response.text.strip()
+        except Exception as err:
+            last_error = err
+            continue
+
+    if last_error:
+        raise last_error
+
+    raise RuntimeError("No response returned from Gemini Q&A model.")
 
 
 if __name__ == "__main__":
