@@ -1,40 +1,50 @@
 /* ============================================================
-   LexAI Design System — "Cinematic 3D Obsidian & Neon"
-   Ultra-modern glassmorphism, 3D perspective elevation, and
-   responsive cybernetic legal intelligence interface.
+   Barr & Douds | LexAI Design System
+   Prestigious law firm luxury (obsidian, burnished gold, Playfair Display,
+   Montserrat) unified with responsive 3D WebGL intelligence.
    ============================================================ */
 
 :root {
-  /* ── Core Deep Space Palette ── */
-  --bg-void:           #05070c;
-  --bg-deep:           #090d15;
-  --bg-surface:        rgba(15, 21, 33, 0.75);
-  --bg-elevated:       rgba(22, 30, 48, 0.70);
-  --bg-card:           rgba(26, 36, 56, 0.55);
-  --bg-hover:          rgba(36, 50, 78, 0.65);
-  --bg-glass:          rgba(13, 18, 28, 0.72);
+  /* ── Barr & Douds Obsidian & Stately Slate Palette ── */
+  --bg-void:           #0a0b0e;
+  --bg-deep:           #0e1017;
+  --bg-surface:        rgba(18, 22, 32, 0.82);
+  --bg-elevated:       rgba(24, 29, 42, 0.80);
+  --bg-card:           rgba(20, 24, 36, 0.65);
+  --bg-hover:          rgba(35, 42, 60, 0.75);
+  --bg-glass:          rgba(14, 18, 27, 0.82);
+  --bg-banner:         #12141a;
 
   /* Glass & Depth */
   --glass-border:      rgba(255, 255, 255, 0.08);
-  --glass-border-hi:   rgba(255, 255, 255, 0.16);
+  --glass-border-hi:   rgba(197, 160, 89, 0.35);
   --glass-blur:        16px;
+  --hairline-border:   rgba(255, 255, 255, 0.12);
+  --hairline-gold:     rgba(197, 160, 89, 0.28);
 
-  /* Typography */
-  --font-display:      'Newsreader', Georgia, serif;
-  --font-body:         'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Typography (Barr & Douds Editorial Elegance) */
+  --font-display:      'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body:         'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono:         'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
 
-  /* Text Colors */
-  --text-primary:      #f8fafc;
-  --text-secondary:    #cbd5e1;
-  --text-muted:        #64748b;
-  --text-accent:       #f0c866;
+  /* Letter Spacing */
+  --tracking-wide:     0.18em;
+  --tracking-widest:   0.3em;
 
-  /* Brand Accents (Gold & Cyan) */
-  --gold:              #d4a843;
-  --gold-bright:       #f5cb6c;
-  --gold-dim:          #8a6c2a;
-  --gold-glow:         rgba(212, 168, 67, 0.35);
+  /* Text Colors */
+  --text-primary:      #ffffff;
+  --text-secondary:    #d0d5dd;
+  --text-muted:        #8592a6;
+  --text-accent:       #c5a059;
+
+  /* Barr & Douds Gold / Champagne Brass Accents */
+  --gold:              #c5a059;
+  --gold-barr:         #c5a059;
+  --gold-bright:       #d4af37;
+  --gold-light:        #ecd599;
+  --gold-dim:          #7a602f;
+  --gold-glow:         rgba(197, 160, 89, 0.35);
+  --gold-border:       rgba(197, 160, 89, 0.35);
 
   --cyan:              #38bdf8;
   --cyan-glow:         rgba(56, 189, 248, 0.35);

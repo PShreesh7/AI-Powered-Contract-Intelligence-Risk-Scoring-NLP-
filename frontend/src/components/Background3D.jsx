@@ -25,33 +25,32 @@ export default function Background3D() {
     container.appendChild(renderer.domElement);
 
     // Particle nodes
-    const particleCount = 180;
+    const particleCount = 190;
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
     const velocities = [];
 
-    const goldColor = new THREE.Color('#d4a843');
-    const cyanColor = new THREE.Color('#38bdf8');
-    const emeraldColor = new THREE.Color('#34d399');
+    const goldBarr = new THREE.Color('#c5a059');
+    const goldBright = new THREE.Color('#e5c158');
+    const goldPale = new THREE.Color('#f5e6c4');
 
     for (let i = 0; i < particleCount; i++) {
-      const x = (Math.random() - 0.5) * 320;
-      const y = (Math.random() - 0.5) * 200;
-      const z = (Math.random() - 0.5) * 160;
+      const x = (Math.random() - 0.5) * 340;
+      const y = (Math.random() - 0.5) * 220;
+      const z = (Math.random() - 0.5) * 180;
 
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
       positions[i * 3 + 2] = z;
 
       velocities.push({
-        x: (Math.random() - 0.5) * 0.12,
-        y: (Math.random() - 0.5) * 0.12,
-        z: (Math.random() - 0.5) * 0.08,
+        x: (Math.random() - 0.5) * 0.09,
+        y: (Math.random() - 0.5) * 0.09,
+        z: (Math.random() - 0.5) * 0.06,
       });
 
-      // Palette mix
       const rand = Math.random();
-      const col = rand < 0.4 ? goldColor : rand < 0.7 ? cyanColor : emeraldColor;
+      const col = rand < 0.6 ? goldBarr : rand < 0.85 ? goldBright : goldPale;
       colors[i * 3] = col.r;
       colors[i * 3 + 1] = col.g;
       colors[i * 3 + 2] = col.b;
@@ -68,25 +67,49 @@ export default function Background3D() {
     const ctx = canvas.getContext('2d');
     const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
     gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(0.3, 'rgba(212, 168, 67, 0.8)');
-    gradient.addColorStop(1, 'rgba(212, 168, 67, 0)');
+    gradient.addColorStop(0.35, 'rgba(197, 160, 89, 0.9)');
+    gradient.addColorStop(1, 'rgba(197, 160, 89, 0)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 32, 32);
 
     const texture = new THREE.CanvasTexture(canvas);
 
     const material = new THREE.PointsMaterial({
-      size: 4.5,
+      size: 4.8,
       vertexColors: true,
       map: texture,
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      opacity: 0.75,
+      opacity: 0.80,
     });
 
     const particles = new THREE.Points(geometry, material);
     scene.add(particles);
+
+    // 3D Stately Legal Ring / Armillary Torus in the background
+    const ringGeo = new THREE.TorusGeometry(85, 0.6, 16, 100);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xc5a059,
+      transparent: true,
+      opacity: 0.16,
+      wireframe: true,
+    });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.rotation.x = Math.PI / 3;
+    scene.add(ringMesh);
+
+    // Secondary inner orbital ring
+    const ring2Geo = new THREE.TorusGeometry(60, 0.4, 12, 80);
+    const ring2Mat = new THREE.MeshBasicMaterial({
+      color: 0xe5c158,
+      transparent: true,
+      opacity: 0.12,
+      wireframe: true,
+    });
+    const ring2Mesh = new THREE.Mesh(ring2Geo, ring2Mat);
+    ring2Mesh.rotation.y = Math.PI / 4;
+    scene.add(ring2Mesh);
 
     // Line network connecting nearest neighbors
     const lineGeo = new THREE.BufferGeometry();
@@ -102,7 +125,7 @@ export default function Background3D() {
       new THREE.LineBasicMaterial({
         vertexColors: true,
         transparent: true,
-        opacity: 0.15,
+        opacity: 0.16,
         blending: THREE.AdditiveBlending,
       })
     );
@@ -148,6 +171,10 @@ export default function Background3D() {
       particles.rotation.x += 0.0003;
       lineMat.rotation.y = particles.rotation.y;
       lineMat.rotation.x = particles.rotation.x;
+      ringMesh.rotation.z += 0.0008;
+      ringMesh.rotation.y += 0.0004;
+      ring2Mesh.rotation.x += 0.0006;
+      ring2Mesh.rotation.z -= 0.0005;
 
       // Update positions
       let lineIndex = 0;
@@ -216,6 +243,10 @@ export default function Background3D() {
       geometry.dispose();
       material.dispose();
       texture.dispose();
+      ringGeo.dispose();
+      ringMat.dispose();
+      ring2Geo.dispose();
+      ring2Mat.dispose();
       lineGeo.dispose();
       lineMat.material.dispose();
       renderer.dispose();

@@ -36,15 +36,14 @@ export default function DashboardHeader({ filename, file, overallRisk, onNewAnal
           e.preventDefault();
           onNewAnalysis();
         }}
-        aria-label="Go to LexAI home"
+        aria-label="Go to Barr & Douds home"
       >
-        <div className="brand-logo-gem">
-          <Scale size={20} className="gem-icon" />
-          <div className="gem-glow" />
+        <div className="barr-crest" style={{ width: 36, height: 36 }}>
+          <Scale size={18} className="crest-icon" />
         </div>
         <div className="brand-text">
-          <span className="brand-name">Lex<span className="brand-ai">AI</span></span>
-          <span className="brand-tagline">INTELLIGENCE</span>
+          <span className="brand-firm" style={{ fontSize: 16 }}>BARR &amp; DOUDS</span>
+          <span className="brand-sub" style={{ fontSize: 8 }}>LEXAI CONTRACT INTELLIGENCE</span>
         </div>
       </a>
 

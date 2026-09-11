@@ -37,7 +37,7 @@ export default function Card3D({
     if (glare) {
       setGlareStyle({
         opacity: 1,
-        background: `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 65%)`,
+        background: `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(229, 193, 88, 0.15) 0%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0) 70%)`,
         transition: 'opacity 0.1s ease',
       });
     }
