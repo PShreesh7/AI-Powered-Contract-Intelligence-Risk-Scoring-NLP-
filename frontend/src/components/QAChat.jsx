@@ -1,7 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
+import {
+  Send,
+  Bot,
+  User,
+  Sparkles,
+  AlertCircle,
+  Loader2,
+  Copy,
+  Check,
+  RotateCcw,
+} from 'lucide-react';
 import { askContractQuestion } from '../api/client.js';
-import Card3D from './Card3D.jsx';
 
 const SUGGESTED_QUESTIONS = [
   'What are the termination conditions & notice periods?',
@@ -14,6 +23,7 @@ export default function QAChat({ clauseTexts = [] }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [copiedIdx, setCopiedIdx] = useState(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -36,7 +46,7 @@ export default function QAChat({ clauseTexts = [] }) {
         ...prev,
         {
           role: 'ai',
-          text: err.message || 'Unable to reach the Gemini Q&A model. Please check GOOGLE_API_KEY.',
+          text: err.message || 'Unable to reach the Gemini Q&A model. Please verify your GEMINI_API_KEY in .env.',
           isError: true,
         },
       ]);
@@ -52,19 +62,47 @@ export default function QAChat({ clauseTexts = [] }) {
     }
   }
 
+  function handleCopy(text, idx) {
+    navigator.clipboard.writeText(text);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 1800);
+  }
+
+  function handleClearChat() {
+    setMessages([]);
+  }
+
   return (
     <div className="qa-panel-3d">
+      {/* Top action bar when messages exist */}
+      {messages.length > 0 && (
+        <div className="qa-header-actions">
+          <span className="qa-active-count">
+            {messages.filter((m) => m.role === 'ai').length} AI Answers
+          </span>
+          <button
+            type="button"
+            className="qa-clear-btn"
+            onClick={handleClearChat}
+            title="Reset conversation"
+          >
+            <RotateCcw size={12} />
+            <span>Clear Chat</span>
+          </button>
+        </div>
+      )}
+
       {/* Messages area */}
       <div className="qa-chat-scroll" role="log" aria-live="polite">
         {messages.length === 0 && (
           <div className="qa-empty-hero">
             <div className="qa-hero-orb">
-              <Sparkles size={28} className="text-accent" />
+              <Sparkles size={26} className="text-accent" />
             </div>
-            <h3 className="qa-hero-title">Grounded Contract Intelligence Chat</h3>
+            <h3 className="qa-hero-title">Grounded Legal AI Assistant</h3>
             <p className="qa-hero-desc">
               Ask specific legal questions in plain English. Powered by Google Gemini, answers are
-              strictly derived and cited from your ingested contract provisions.
+              strictly derived and cited from your ingested contract provisions with zero hallucination.
             </p>
 
             <div className="qa-suggestions-grid">
@@ -95,6 +133,29 @@ export default function QAChat({ clauseTexts = [] }) {
             <div className={`chat-message-bubble ${msg.isError ? 'is-error' : ''}`}>
               {msg.isError && <AlertCircle size={15} className="error-icon" />}
               <p className="bubble-text">{msg.text}</p>
+
+              {msg.role === 'ai' && !msg.isError && (
+                <div className="chat-msg-footer">
+                  <button
+                    type="button"
+                    className="msg-copy-btn"
+                    onClick={() => handleCopy(msg.text, idx)}
+                    title="Copy response"
+                  >
+                    {copiedIdx === idx ? (
+                      <>
+                        <Check size={12} className="text-success" />
+                        <span>Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={11} />
+                        <span>Copy Answer</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -122,7 +183,7 @@ export default function QAChat({ clauseTexts = [] }) {
         <div className="qa-input-card">
           <textarea
             rows={1}
-            placeholder="Ask a question about termination, liability, payment, or parties…"
+            placeholder="Ask a question about termination, liability, payment, or governing law…"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -138,7 +199,7 @@ export default function QAChat({ clauseTexts = [] }) {
           </button>
         </div>
         <div className="qa-input-footnote">
-          Press Enter to send · Grounded in {clauseTexts.length} segmented contract clauses
+          Press Enter to send &bull; Grounded across {clauseTexts.length} segmented contract provisions
         </div>
       </div>
     </div>

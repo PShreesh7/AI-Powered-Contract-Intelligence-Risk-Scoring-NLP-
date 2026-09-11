@@ -11,12 +11,12 @@ export default function Background3D() {
     // Scene & Camera
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      60,
+      55,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    camera.position.z = 180;
+    camera.position.z = 200;
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -24,33 +24,29 @@ export default function Background3D() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // Particle nodes
-    const particleCount = 190;
+    // Subtle Particle Field
+    const particleCount = 110;
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
     const velocities = [];
 
-    const goldBarr = new THREE.Color('#c5a059');
-    const goldBright = new THREE.Color('#e5c158');
-    const goldPale = new THREE.Color('#f5e6c4');
+    const goldSoft = new THREE.Color('#c5a059');
+    const goldGlint = new THREE.Color('#e2c882');
+    const platinumSoft = new THREE.Color('#8fa4bc');
 
     for (let i = 0; i < particleCount; i++) {
-      const x = (Math.random() - 0.5) * 340;
-      const y = (Math.random() - 0.5) * 220;
-      const z = (Math.random() - 0.5) * 180;
-
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+      positions[i * 3] = (Math.random() - 0.5) * 360;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 240;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 160;
 
       velocities.push({
-        x: (Math.random() - 0.5) * 0.09,
-        y: (Math.random() - 0.5) * 0.09,
-        z: (Math.random() - 0.5) * 0.06,
+        x: (Math.random() - 0.5) * 0.04,
+        y: (Math.random() - 0.5) * 0.04,
+        z: (Math.random() - 0.5) * 0.03,
       });
 
       const rand = Math.random();
-      const col = rand < 0.6 ? goldBarr : rand < 0.85 ? goldBright : goldPale;
+      const col = rand < 0.6 ? goldSoft : rand < 0.85 ? goldGlint : platinumSoft;
       colors[i * 3] = col.r;
       colors[i * 3 + 1] = col.g;
       colors[i * 3 + 2] = col.b;
@@ -66,8 +62,8 @@ export default function Background3D() {
     canvas.height = 32;
     const ctx = canvas.getContext('2d');
     const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(0.35, 'rgba(197, 160, 89, 0.9)');
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+    gradient.addColorStop(0.3, 'rgba(197, 160, 89, 0.6)');
     gradient.addColorStop(1, 'rgba(197, 160, 89, 0)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 32, 32);
@@ -75,48 +71,49 @@ export default function Background3D() {
     const texture = new THREE.CanvasTexture(canvas);
 
     const material = new THREE.PointsMaterial({
-      size: 4.8,
+      size: 3.5,
       vertexColors: true,
       map: texture,
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      opacity: 0.80,
+      opacity: 0.55,
     });
 
     const particles = new THREE.Points(geometry, material);
     scene.add(particles);
 
-    // 3D Stately Legal Ring / Armillary Torus in the background
-    const ringGeo = new THREE.TorusGeometry(85, 0.6, 16, 100);
+    // Elegant, faint background ring
+    const ringGeo = new THREE.TorusGeometry(100, 0.35, 16, 120);
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0xc5a059,
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.06,
       wireframe: true,
     });
     const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-    ringMesh.rotation.x = Math.PI / 3;
+    ringMesh.rotation.x = Math.PI / 3.2;
+    ringMesh.position.z = -40;
     scene.add(ringMesh);
 
-    // Secondary inner orbital ring
-    const ring2Geo = new THREE.TorusGeometry(60, 0.4, 12, 80);
+    // Second faint orbital ring
+    const ring2Geo = new THREE.TorusGeometry(75, 0.25, 12, 100);
     const ring2Mat = new THREE.MeshBasicMaterial({
-      color: 0xe5c158,
+      color: 0x8fa4bc,
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.04,
       wireframe: true,
     });
     const ring2Mesh = new THREE.Mesh(ring2Geo, ring2Mat);
     ring2Mesh.rotation.y = Math.PI / 4;
+    ring2Mesh.position.z = -50;
     scene.add(ring2Mesh);
 
-    // Line network connecting nearest neighbors
+    // Subtle connecting lines (sparse & faint)
+    const maxLines = particleCount * 2;
+    const linePositions = new Float32Array(maxLines * 6);
+    const lineColors = new Float32Array(maxLines * 6);
     const lineGeo = new THREE.BufferGeometry();
-    const maxLineConnections = particleCount * 6;
-    const linePositions = new Float32Array(maxLineConnections * 3);
-    const lineColors = new Float32Array(maxLineConnections * 3);
-
     lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
     lineGeo.setAttribute('color', new THREE.BufferAttribute(lineColors, 3));
 
@@ -125,7 +122,7 @@ export default function Background3D() {
       new THREE.LineBasicMaterial({
         vertexColors: true,
         transparent: true,
-        opacity: 0.16,
+        opacity: 0.07,
         blending: THREE.AdditiveBlending,
       })
     );
@@ -138,13 +135,12 @@ export default function Background3D() {
     let targetY = 0;
 
     const handleMouseMove = (e) => {
-      mouseX = (e.clientX - window.innerWidth / 2) * 0.05;
-      mouseY = (e.clientY - window.innerHeight / 2) * 0.05;
+      mouseX = (e.clientX - window.innerWidth / 2) * 0.02;
+      mouseY = (e.clientY - window.innerHeight / 2) * 0.02;
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
-    // Handle Resize
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -160,25 +156,20 @@ export default function Background3D() {
       animId = requestAnimationFrame(animate);
 
       // Smooth camera motion
-      targetX += (mouseX - targetX) * 0.03;
-      targetY += (mouseY - targetY) * 0.03;
+      targetX += (mouseX - targetX) * 0.02;
+      targetY += (mouseY - targetY) * 0.02;
       camera.position.x = targetX;
       camera.position.y = -targetY;
       camera.lookAt(0, 0, 0);
 
-      // Rotate whole mesh slowly
-      particles.rotation.y += 0.0006;
-      particles.rotation.x += 0.0003;
-      lineMat.rotation.y = particles.rotation.y;
-      lineMat.rotation.x = particles.rotation.x;
-      ringMesh.rotation.z += 0.0008;
-      ringMesh.rotation.y += 0.0004;
-      ring2Mesh.rotation.x += 0.0006;
-      ring2Mesh.rotation.z -= 0.0005;
+      // Smooth slow rotations
+      particles.rotation.y += 0.0003;
+      ringMesh.rotation.z += 0.0004;
+      ring2Mesh.rotation.x += 0.0003;
 
       // Update positions
       let lineIndex = 0;
-      const connectDist = 42;
+      const connectDist = 34;
 
       for (let i = 0; i < particleCount; i++) {
         const i3 = i * 3;
@@ -186,37 +177,35 @@ export default function Background3D() {
         posArr[i3 + 1] += velocities[i].y;
         posArr[i3 + 2] += velocities[i].z;
 
-        // Bounce back within bounds
-        if (Math.abs(posArr[i3]) > 160) velocities[i].x *= -1;
-        if (Math.abs(posArr[i3 + 1]) > 100) velocities[i].y *= -1;
-        if (Math.abs(posArr[i3 + 2]) > 80) velocities[i].z *= -1;
+        if (Math.abs(posArr[i3]) > 170) velocities[i].x *= -1;
+        if (Math.abs(posArr[i3 + 1]) > 110) velocities[i].y *= -1;
+        if (Math.abs(posArr[i3 + 2]) > 90) velocities[i].z *= -1;
 
-        // Connect nearby points with lines
-        for (let j = i + 1; j < particleCount; j++) {
+        for (let j = i + 1; j < Math.min(i + 6, particleCount); j++) {
           const j3 = j * 3;
           const dx = posArr[i3] - posArr[j3];
           const dy = posArr[i3 + 1] - posArr[j3 + 1];
           const dz = posArr[i3 + 2] - posArr[j3 + 2];
           const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-          if (dist < connectDist && lineIndex < maxLineConnections - 6) {
-            const alpha = 1 - dist / connectDist;
+          if (dist < connectDist && lineIndex < maxLines * 6 - 6) {
+            const alpha = (1 - dist / connectDist) * 0.45;
 
             linePositions[lineIndex] = posArr[i3];
             linePositions[lineIndex + 1] = posArr[i3 + 1];
             linePositions[lineIndex + 2] = posArr[i3 + 2];
 
-            lineColors[lineIndex] = 0.83 * alpha;
-            lineColors[lineIndex + 1] = 0.66 * alpha;
-            lineColors[lineIndex + 2] = 0.26 * alpha;
+            lineColors[lineIndex] = 0.77 * alpha;
+            lineColors[lineIndex + 1] = 0.63 * alpha;
+            lineColors[lineIndex + 2] = 0.35 * alpha;
 
             linePositions[lineIndex + 3] = posArr[j3];
             linePositions[lineIndex + 4] = posArr[j3 + 1];
             linePositions[lineIndex + 5] = posArr[j3 + 2];
 
-            lineColors[lineIndex + 3] = 0.22 * alpha;
-            lineColors[lineIndex + 4] = 0.74 * alpha;
-            lineColors[lineIndex + 5] = 0.97 * alpha;
+            lineColors[lineIndex + 3] = 0.45 * alpha;
+            lineColors[lineIndex + 4] = 0.55 * alpha;
+            lineColors[lineIndex + 5] = 0.70 * alpha;
 
             lineIndex += 6;
           }

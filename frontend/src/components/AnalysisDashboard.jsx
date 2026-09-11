@@ -12,6 +12,8 @@ import {
   Search,
   Filter,
   Sparkles,
+  ChevronDown,
+  X,
 } from 'lucide-react';
 import DashboardHeader from './DashboardHeader.jsx';
 import ContractViewer from './ContractViewer.jsx';
@@ -193,51 +195,66 @@ function OverviewTab({
   entitiesCount,
 }) {
   const [filterRisk, setFilterRisk] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const chars = rawTextLength ? rawTextLength.toLocaleString() : '—';
 
+  // Available unique categories for the dropdown filter form
+  const uniqueCategories = useMemo(() => {
+    const set = new Set();
+    clauses.forEach((c) => {
+      if (c.clauseType) set.add(c.clauseType);
+    });
+    return Array.from(set).sort();
+  }, [clauses]);
+
   const verdict =
     overallRisk >= 70
       ? {
-          title: 'High Legal Risk Detected',
-          desc: 'Critical exposure identified in indemnification, liability, or termination rights. Immediate counsel renegotiation strongly advised.',
+          title: 'High Risk Profile Detected',
+          desc: 'Significant exposure identified in liability, indemnification, or termination terms. Review highlighted provisions carefully.',
           cls: 'danger',
           color: '#ff4d4d',
+          status: 'Critical Attention Required',
         }
       : overallRisk >= 40
       ? {
           title: 'Moderate Contract Exposure',
-          desc: 'Document contains one-sided discretionary powers or open-ended renewal commitments. Review flagged clauses before signing.',
+          desc: 'Contains conditional covenants or discretionary renewal provisions. Review highlighted clauses prior to execution.',
           cls: 'warning',
           color: '#ffa600',
+          status: 'Review Recommended',
         }
       : {
           title: 'Standard Commercial Terms',
-          desc: 'Favorable provisions with customary liability caps and bilateral termination terms. Low legal risk profile.',
+          desc: 'Provisions adhere to standard bilateral terms with customary liability caps and mutual confidentiality.',
           cls: 'success',
           color: '#00e699',
+          status: 'Standard Agreement',
         };
 
   const filteredClauses = useMemo(() => {
     return clauses.filter((c) => {
-      const matchesFilter = filterRisk === 'all' || c.risk === filterRisk;
+      const matchesRisk = filterRisk === 'all' || c.risk === filterRisk;
+      const matchesCategory =
+        selectedCategory === 'all' || c.clauseType === selectedCategory;
       const matchesSearch =
         !searchQuery.trim() ||
         c.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.clauseType.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesFilter && matchesSearch;
+      return matchesRisk && matchesCategory && matchesSearch;
     });
-  }, [clauses, filterRisk, searchQuery]);
+  }, [clauses, filterRisk, selectedCategory, searchQuery]);
 
   return (
     <div className="tab-scroll-container">
-      {/* 3D Cinematic Verdict HUD */}
+      {/* Sleek Unified Verdict Banner */}
       <Card3D
         className={`verdict-hud-card hud-${verdict.cls}`}
-        maxTilt={4}
-        scale={1.01}
+        maxTilt={3}
+        scale={1.008}
       >
         <div className="verdict-hud-left">
           <div className="verdict-beacon">
@@ -252,28 +269,25 @@ function OverviewTab({
           </div>
         </div>
 
-        <div className="verdict-hud-stats">
-          <div className="hud-metric">
-            <span className="metric-label">SCORE</span>
-            <span className="metric-val" style={{ color: verdict.color }}>
-              {overallRisk}
-            </span>
-          </div>
-          <div className="hud-metric-sep" />
-          <div className="hud-metric">
-            <span className="metric-label">FLAGGED</span>
-            <span className="metric-val text-danger">{highRisk + medRisk}</span>
-          </div>
+        <div className="verdict-hud-meta-pills">
+          <span className={`verdict-status-pill pill-${verdict.cls}`}>
+            {verdict.status}
+          </span>
+          <span className="verdict-doc-pill">
+            {chars} characters
+          </span>
         </div>
       </Card3D>
 
-      {/* 4 Interactive 3D Stat Cards */}
+      {/* 4 Distinct, Purposeful Metric Cards (No redundant duplicates) */}
       <div className="overview-stats-3d">
-        <Card3D className="stat-card-3d" maxTilt={8}>
-          <div className="stat-icon-wrap text-accent">
-            <Sparkles size={20} />
+        <Card3D className="stat-card-3d" maxTilt={6}>
+          <div className="stat-icon-wrap" style={{ color: verdict.color, background: `${verdict.color}15` }}>
+            <Sparkles size={18} />
           </div>
-          <div className="stat-metric-val">{overallRisk}<span className="stat-unit">/100</span></div>
+          <div className="stat-metric-val" style={{ color: verdict.color }}>
+            {overallRisk}<span className="stat-unit">/100</span>
+          </div>
           <div className="stat-metric-lbl">Overall Risk Index</div>
           <div className="stat-bar-track">
             <div
@@ -281,60 +295,62 @@ function OverviewTab({
               style={{
                 width: `${overallRisk}%`,
                 background: verdict.color,
-                boxShadow: `0 0 10px ${verdict.color}`,
               }}
             />
           </div>
         </Card3D>
 
-        <Card3D className="stat-card-3d" maxTilt={8}>
-          <div className="stat-icon-wrap text-danger">
-            <ShieldAlert size={20} />
+        <Card3D className="stat-card-3d" maxTilt={6}>
+          <div className="stat-icon-wrap text-danger" style={{ background: 'rgba(255, 77, 77, 0.12)' }}>
+            <ShieldAlert size={18} />
           </div>
-          <div className="stat-metric-val text-danger">{highRisk}</div>
-          <div className="stat-metric-lbl">High-Risk Clauses</div>
+          <div className="stat-metric-val text-danger">
+            {highRisk + medRisk}
+          </div>
+          <div className="stat-metric-lbl">
+            {highRisk > 0 ? `${highRisk} High / ${medRisk} Med Risks` : '0 Critical Flags'}
+          </div>
           <div className="stat-bar-track">
             <div
               className="stat-bar-fill"
               style={{
-                width: `${clauses.length ? (highRisk / clauses.length) * 100 : 0}%`,
-                background: '#ff4d4d',
-                boxShadow: '0 0 10px #ff4d4d',
+                width: `${clauses.length ? ((highRisk + medRisk) / clauses.length) * 100 : 0}%`,
+                background: highRisk > 0 ? '#ff4d4d' : '#ffa600',
               }}
             />
           </div>
         </Card3D>
 
-        <Card3D className="stat-card-3d" maxTilt={8}>
-          <div className="stat-icon-wrap text-success">
-            <FileCode size={20} />
+        <Card3D className="stat-card-3d" maxTilt={6}>
+          <div className="stat-icon-wrap text-success" style={{ background: 'rgba(0, 230, 153, 0.12)' }}>
+            <FileCode size={18} />
           </div>
           <div className="stat-metric-val">{clauses.length}</div>
-          <div className="stat-metric-lbl">Total Clauses Segmented</div>
+          <div className="stat-metric-lbl">CUAD Clauses Classified</div>
           <div className="stat-bar-track">
             <div
               className="stat-bar-fill"
-              style={{ width: '100%', background: '#00e699', boxShadow: '0 0 10px #00e699' }}
+              style={{ width: '100%', background: '#00e699' }}
             />
           </div>
         </Card3D>
 
-        <Card3D className="stat-card-3d" maxTilt={8}>
-          <div className="stat-icon-wrap text-primary">
-            <FileText size={20} />
+        <Card3D className="stat-card-3d" maxTilt={6}>
+          <div className="stat-icon-wrap text-accent" style={{ background: 'rgba(197, 160, 89, 0.12)' }}>
+            <Tags size={18} />
           </div>
-          <div className="stat-metric-val">{chars}</div>
-          <div className="stat-metric-lbl">Document Characters</div>
+          <div className="stat-metric-val">{entitiesCount}</div>
+          <div className="stat-metric-lbl">Named Legal Entities</div>
           <div className="stat-bar-track">
             <div
               className="stat-bar-fill"
-              style={{ width: '85%', background: '#38bdf8', boxShadow: '0 0 10px #38bdf8' }}
+              style={{ width: '90%', background: '#c5a059' }}
             />
           </div>
         </Card3D>
       </div>
 
-      {/* Filter and Clause Section */}
+      {/* Enhanced Filter and Clause Stream Section */}
       <div className="clause-stream-section">
         <div className="clause-stream-header">
           <div className="stream-title-wrap">
@@ -343,7 +359,7 @@ function OverviewTab({
           </div>
 
           <div className="stream-controls">
-            {/* Search Input */}
+            {/* Search Input with Clear Button */}
             <div className="stream-search-box">
               <Search size={14} className="search-icon" />
               <input
@@ -352,9 +368,38 @@ function OverviewTab({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="search-clear-btn"
+                  onClick={() => setSearchQuery('')}
+                  title="Clear search"
+                >
+                  <X size={13} />
+                </button>
+              )}
             </div>
 
-            {/* Risk Filters */}
+            {/* Category Dropdown Filter Form */}
+            {uniqueCategories.length > 1 && (
+              <div className="stream-select-box">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="stream-category-select"
+                  aria-label="Filter by clause category"
+                >
+                  <option value="all">All Clause Types ({uniqueCategories.length})</option>
+                  {uniqueCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Risk Filter Chips */}
             <div className="stream-filters">
               {['all', 'high', 'medium', 'low'].map((filterKey) => (
                 <button
@@ -374,7 +419,20 @@ function OverviewTab({
         {filteredClauses.length === 0 ? (
           <div className="empty-stream-card">
             <AlertTriangle size={24} className="empty-icon" />
-            <p>No clauses match the selected search or risk filter.</p>
+            <p>No clauses match the selected search or category filter.</p>
+            {(searchQuery || filterRisk !== 'all' || selectedCategory !== 'all') && (
+              <button
+                type="button"
+                className="reset-filters-btn"
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilterRisk('all');
+                  setSelectedCategory('all');
+                }}
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="clause-grid-stream">

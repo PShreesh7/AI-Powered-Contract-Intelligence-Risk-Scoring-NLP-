@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileDown, PlusCircle, Scale, FileText, Loader2, Sparkles } from 'lucide-react';
+import { FileDown, PlusCircle, Scale, FileText, Loader2, Cpu } from 'lucide-react';
 import { downloadPdfReport } from '../api/client.js';
 
 export default function DashboardHeader({ filename, file, overallRisk, onNewAnalysis }) {
@@ -36,14 +36,14 @@ export default function DashboardHeader({ filename, file, overallRisk, onNewAnal
           e.preventDefault();
           onNewAnalysis();
         }}
-        aria-label="Go to Barr & Douds home"
+        aria-label="LexAI Home"
       >
-        <div className="barr-crest" style={{ width: 36, height: 36 }}>
+        <div className="lex-brand-crest">
           <Scale size={18} className="crest-icon" />
         </div>
         <div className="brand-text">
-          <span className="brand-firm" style={{ fontSize: 16 }}>BARR &amp; DOUDS</span>
-          <span className="brand-sub" style={{ fontSize: 8 }}>LEXAI CONTRACT INTELLIGENCE</span>
+          <span className="brand-firm">LexAI</span>
+          <span className="brand-sub">CONTRACT INTELLIGENCE &amp; RISK NLP</span>
         </div>
       </a>
 

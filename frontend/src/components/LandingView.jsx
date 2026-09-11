@@ -10,47 +10,67 @@ import {
   Scale,
   ArrowRight,
   AlertCircle,
-  Phone,
   CheckCircle2,
-  Lock,
-  ChevronDown,
+  Layers,
+  Code2,
+  FileEdit,
+  RotateCcw,
+  Zap,
 } from 'lucide-react';
 import Card3D from './Card3D.jsx';
 
-const PRACTICE_AREAS = [
+const SAMPLE_HIGH_RISK_TEXT = `MUTUAL NON-DISCLOSURE AND INDEMNIFICATION AGREEMENT
+
+1. CONFIDENTIALITY OBLIGATIONS: Receiving Party shall hold all Confidential Information in strictest confidence and shall not disclose it to any third party for an indefinite duration without prior written authorization.
+
+2. INDEMNIFICATION AND UNLIMITED LIABILITY: Receiving Party agrees to indemnify, defend, and hold harmless Disclosing Party, its affiliates, officers, and contractors against any and all losses, claims, damages, liabilities, and legal fees arising directly or indirectly out of any disclosure or breach, without any financial cap or limitation of liability whatsoever.
+
+3. IMMEDIATE TERMINATION AT WILL: Disclosing Party reserves the unilateral right to immediately terminate this Agreement at any time without cause and without any notice or cure period, while Receiving Party's obligations shall survive perpetuity.
+
+4. GOVERNING LAW AND DISPUTE VENUE: This Agreement shall be governed exclusively by the laws of the State of Delaware, and any disputes shall be resolved in the Court of Chancery with all arbitration fees borne entirely by Receiving Party.`;
+
+const CAPABILITIES = [
   {
-    title: 'Trust & Fiduciary Agreements',
-    category: 'ESTATE & LITIGATION',
-    desc: 'Audits discretionary trustee powers, accounting compulsion mandates, and conflict-of-interest covenants against California Probate Code standards.',
-    img: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80',
-    tags: ['Fiduciary Duties', 'Accounting', 'Discretionary Terms'],
+    title: 'CUAD Clause Classification',
+    category: 'DEEP LEARNING NLP',
+    desc: 'Segments 41+ legal categories including indemnification, liability caps, non-competes, and termination rights.',
+    icon: Layers,
+    stats: '41+ Taxonomy Classes',
   },
   {
-    title: 'High-Stakes Liability Shields',
-    category: 'COMMERCIAL LITIGATION',
-    desc: 'Detects uncapped financial liability exposure, aggressive cross-indemnities, and carve-outs that leave organizations vulnerable to claims.',
-    img: 'https://images.unsplash.com/photo-1453733190371-0a9bedd828e1?auto=format&fit=crop&w=800&q=80',
-    tags: ['Liability Caps', 'Indemnification', 'Consequential Damages'],
+    title: 'Named Entity & Jurisdiction Extraction',
+    category: 'INFORMATION EXTRACTION',
+    desc: 'Extracts contracting parties, named signatories, effective dates, monetary values, and governing jurisdictions via legal NER.',
+    icon: Cpu,
+    stats: 'Multi-Entity NER',
   },
   {
-    title: 'Unilateral Termination Defense',
-    category: 'RISK MITIGATION',
-    desc: 'Flags immediate termination triggers without cure periods, evergreen renewal traps, and non-standard governing jurisdiction clauses.',
-    img: 'https://images.unsplash.com/photo-1589994965851-a8f479c573a9?auto=format&fit=crop&w=800&q=80',
-    tags: ['Termination at Will', 'Cure Periods', 'Governing Law'],
+    title: 'Deterministic Risk Scoring',
+    category: 'RISK ASSESSMENT',
+    desc: 'Evaluates one-sided indemnities, uncapped exposure, and non-standard clauses to generate a 0–100 severity index.',
+    icon: ShieldCheck,
+    stats: '0–100 Exposure Index',
   },
   {
-    title: 'Autonomous Generative Advisory',
-    category: 'NLP REASONING',
-    desc: 'Direct, plain-language Q&A grounded exclusively in executed contract text powered by Google Gemini LLM with exact clause citations.',
-    img: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=800&q=80',
-    tags: ['Grounded Q&A', 'Citation Engine', 'Remediation Tips'],
+    title: 'Grounded Legal AI Assistant',
+    category: 'REASONING & Q&A',
+    desc: 'Conversational legal reasoning powered by Google Gemini, cited strictly from verified contract provisions with zero hallucination.',
+    icon: MessageSquareCode,
+    stats: 'Google Gemini Powered',
   },
 ];
 
 export default function LandingView({ onUpload, error }) {
+  const [inputMode, setInputMode] = useState('upload'); // 'upload' | 'text_form'
   const [isDragOver, setIsDragOver] = useState(false);
   const [demoLoading, setDemoLoading] = useState(null);
+
+  // Direct Text Form State
+  const [docTitle, setDocTitle] = useState('');
+  const [docCategory, setDocCategory] = useState('NDA');
+  const [customText, setCustomText] = useState('');
+  const [formValidation, setFormValidation] = useState('');
+
   const inputRef = useRef(null);
 
   function handleFileChange(e) {
@@ -96,353 +116,435 @@ export default function LandingView({ onUpload, error }) {
     }
   }
 
+  function handleTextFormSubmit(e) {
+    e.preventDefault();
+    if (!customText.trim()) {
+      setFormValidation('Please paste or type contract text before submitting.');
+      return;
+    }
+    if (customText.trim().length < 40) {
+      setFormValidation('Contract text is too short. Please provide at least one complete clause.');
+      return;
+    }
+    setFormValidation('');
+
+    const safeTitle = (docTitle.trim() || `${docCategory}_Agreement`)
+      .replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_-]/g, '');
+    const filename = `${safeTitle}.txt`;
+
+    const blob = new Blob([customText], { type: 'text/plain' });
+    const file = new File([blob], filename, { type: 'text/plain' });
+    onUpload(file);
+  }
+
+  function handleInsertSample() {
+    setDocTitle('Sample_Uncapped_Indemnity_Agreement');
+    setDocCategory('NDA');
+    setCustomText(SAMPLE_HIGH_RISK_TEXT);
+    setFormValidation('');
+  }
+
+  function handleClearForm() {
+    setDocTitle('');
+    setCustomText('');
+    setFormValidation('');
+  }
+
   const scrollToAudit = () => {
-    document.getElementById('audit-section')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('audit-workspace')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const scrollToPractices = () => {
-    document.getElementById('practice-areas')?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToCapabilities = () => {
+    document.getElementById('capabilities')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <div className="barr-landing">
-      {/* 1. Stately Top Contact Bar (Barr & Douds Signature) */}
-      <div className="barr-call-bar">
-        <div className="barr-container">
-          <div className="barr-call-inner">
-            <div className="call-info">
-              <span className="call-label">CALL US:</span>
-              <a href="tel:+19253149999" className="call-phone">(925) 314-9999</a>
-              <span className="call-divider">|</span>
-              <span className="call-location">DANVILLE, CA &amp; NORTHERN CALIFORNIA LITIGATION</span>
-            </div>
-            <div className="call-status">
-              <span className="status-dot" />
-              <span>AI CONTRACT INTELLIGENCE ENGINE ONLINE</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Executive Navigation Header */}
-      <header className="barr-header">
-        <div className="barr-container">
-          <div className="barr-nav-row">
-            {/* Logo */}
-            <div className="barr-brand">
-              <div className="barr-crest">
-                <Scale size={24} className="crest-icon" />
+    <div className="lex-landing">
+      {/* 1. Sleek Navigation Header */}
+      <header className="lex-nav-header">
+        <div className="lex-container">
+          <div className="lex-nav-row">
+            {/* Brand Logo */}
+            <div className="lex-brand">
+              <div className="lex-brand-crest">
+                <Scale size={22} className="crest-icon" />
               </div>
-              <div className="barr-brand-text">
-                <span className="brand-firm">BARR &amp; DOUDS</span>
-                <span className="brand-sub">ATTORNEYS AT LAW &bull; LEXAI INTELLIGENCE</span>
+              <div className="lex-brand-text">
+                <span className="brand-firm">LexAI</span>
+                <span className="brand-sub">CONTRACT INTELLIGENCE &amp; RISK NLP</span>
               </div>
             </div>
 
-            {/* Nav Menu */}
-            <nav className="barr-nav-links">
-              <a href="#results" className="barr-nav-item">TRACK RECORD</a>
-              <a href="#practice-areas" className="barr-nav-item">PRACTICE AREAS</a>
-              <a href="#audit-section" className="barr-nav-item">CONTRACT AUDIT</a>
-              <a href="#consultation" className="barr-nav-item">ABOUT COUNSEL</a>
+            {/* Navigation Links */}
+            <nav className="lex-nav-links">
+              <a href="#audit-workspace" className="lex-nav-item">AUDIT WORKSPACE</a>
+              <a href="#capabilities" className="lex-nav-item">CAPABILITIES</a>
+              <a href="#benchmark" className="lex-nav-item">TAXONOMY &amp; METRICS</a>
+              <a href="/docs" target="_blank" rel="noreferrer" className="lex-nav-item">API DOCS</a>
             </nav>
 
-            {/* Header CTA Button */}
-            <div className="barr-header-action">
-              <button type="button" onClick={scrollToAudit} className="barr-btn barr-btn-primary">
-                <span className="btn-text">Audit a Contract</span>
-                <span className="btn-arrow">
-                  <ArrowRight size={14} />
-                </span>
+            {/* Header CTA */}
+            <div className="lex-nav-action">
+              <button type="button" onClick={scrollToAudit} className="lex-btn lex-btn-primary">
+                <span>Analyze Contract</span>
+                <ArrowRight size={14} />
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* 3. Stately Hero Section */}
-      <section className="barr-hero">
-        <div className="barr-hero-overlay" />
-        <div className="barr-container barr-hero-container">
-          <div className="barr-hero-content">
-            <div className="barr-subtitle">
-              <span>BARR &amp; DOUDS ATTORNEYS &bull; DANVILLE, CA</span>
+      {/* 2. Hero Section */}
+      <section className="lex-hero">
+        <div className="lex-hero-glow" />
+        <div className="lex-container lex-hero-container">
+          <div className="lex-hero-badge">
+            <Sparkles size={14} className="badge-sparkle" />
+            <span>CUAD-TRAINED &bull; SPACY LEGAL NER &bull; GEMINI LLM REASONING</span>
+          </div>
+
+          <h1 className="lex-h1">
+            Intelligent Legal Contract Auditing &amp; Risk Scoring
+          </h1>
+
+          <p className="lex-hero-desc">
+            Instantly segment 41+ CUAD clause categories, extract named parties and jurisdictions, calculate deterministic financial exposure, and converse with a grounded AI legal assistant.
+          </p>
+
+          <div className="lex-hero-actions">
+            <button type="button" onClick={scrollToAudit} className="lex-btn lex-btn-gold">
+              <span>Start Contract Audit</span>
+              <ArrowRight size={15} />
+            </button>
+
+            <button type="button" onClick={scrollToCapabilities} className="lex-btn lex-btn-secondary">
+              <span>Explore Architecture</span>
+              <ArrowRight size={15} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Proven Records & Benchmark Strip */}
+      <section className="lex-benchmark-strip" id="benchmark">
+        <div className="lex-container">
+          <div className="lex-benchmark-grid">
+            <div className="benchmark-col">
+              <div className="benchmark-num">41+</div>
+              <div className="benchmark-title">CUAD Clause Categories</div>
+              <div className="benchmark-sub">Granular contract clause classification</div>
             </div>
 
-            <h1 className="barr-h1">
-              Sophisticated Contract Intelligence &amp; Autonomous Risk Litigation
-            </h1>
+            <div className="benchmark-col">
+              <div className="benchmark-num">99.4%</div>
+              <div className="benchmark-title">Entity Extraction Precision</div>
+              <div className="benchmark-sub">Parties, dates, values &amp; jurisdictions</div>
+            </div>
 
-            <p className="barr-hero-desc">
-              Barr &amp; Douds represents trustees, fiduciaries, corporate counsel, and enterprise partners in high-stakes contractual disputes. Our proprietary legal NLP platform parses multi-tier agreements in seconds—pinpointing hidden fiduciary liabilities, broad indemnities, uncapped exposure, and non-standard clauses with deterministic precision.
-            </p>
+            <div className="benchmark-col">
+              <div className="benchmark-num">&lt; 3.2s</div>
+              <div className="benchmark-title">Analysis Turnaround</div>
+              <div className="benchmark-sub">Full multi-tier document pipeline</div>
+            </div>
 
-            <div className="barr-hero-actions">
-              <button type="button" onClick={scrollToAudit} className="barr-btn barr-btn-gold">
-                <span className="btn-text">Run Automated Contract Audit</span>
-                <span className="btn-arrow">
-                  <ArrowRight size={15} />
-                </span>
-              </button>
-
-              <button type="button" onClick={scrollToPractices} className="barr-btn barr-btn-outline">
-                <span className="btn-text">Explore Practice Capabilities</span>
-                <span className="btn-arrow">
-                  <ArrowRight size={15} />
-                </span>
-              </button>
+            <div className="benchmark-col">
+              <div className="benchmark-num">100%</div>
+              <div className="benchmark-title">Grounded Explanations</div>
+              <div className="benchmark-sub">Cited directly from extracted clauses</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. Results & Proven Record Strip (Signature Barr & Douds Section) */}
-      <section className="barr-results" id="results">
-        <div className="barr-results-heading">
-          <span className="results-pretitle">SINCE 2007</span>
-          <h2 className="barr-h2">Proven Litigation &amp; Contract Intelligence Record</h2>
-        </div>
-
-        <div className="barr-container">
-          <div className="barr-results-grid">
-            <div className="barr-results-col">
-              <div className="results-num">200+</div>
-              <div className="results-text">CUAD Legal Categories &amp; Rules</div>
-            </div>
-
-            <div className="barr-results-col">
-              <div className="results-num">99.4%</div>
-              <div className="results-text">NER Entity &amp; Jurisdiction Precision</div>
-            </div>
-
-            <div className="barr-results-col">
-              <div className="results-num">100%</div>
-              <div className="results-text">Grounded Gemini AI Explanations</div>
-            </div>
-
-            <div className="barr-results-col">
-              <div className="results-num">&lt; 3.2s</div>
-              <div className="results-text">End-to-End Analysis Turnaround</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. 3D Interactive Contract Audit Workspace (Dropzone & One-Click Demos) */}
-      <section className="barr-audit-section" id="audit-section">
-        <div className="barr-container">
-          <div className="barr-section-header">
-            <div className="barr-subtitle">CONTRACT ANALYSIS WORKSPACE</div>
-            <h2 className="barr-h2">Submit an Agreement for Confidential Audit</h2>
-            <p className="barr-section-desc">
-              Upload any executed PDF, Word document, or plain text agreement to generate a complete legal risk breakdown, extracted entities, classified provisions, and AI remediation guidance.
+      {/* 4. Interactive Dual-Mode Contract Audit Workspace */}
+      <section className="lex-audit-section" id="audit-workspace">
+        <div className="lex-container">
+          <div className="lex-section-header">
+            <div className="lex-kicker">AUDIT WORKSPACE</div>
+            <h2 className="lex-h2">Submit a Contract for Comprehensive Analysis</h2>
+            <p className="lex-section-desc">
+              Choose to either upload an agreement file or paste specific contract text and clauses directly into the analysis form.
             </p>
           </div>
 
           {/* Error Banner */}
           {error && (
-            <div className="barr-error-banner">
+            <div className="lex-error-banner">
               <AlertCircle size={20} />
               <span>{error}</span>
             </div>
           )}
 
-          {/* 3D Holographic Dropzone Card */}
-          <Card3D
-            className={`barr-upload-card ${isDragOver ? 'is-drag-over' : ''}`}
-            maxTilt={6}
-            scale={1.01}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onClick={() => inputRef.current?.click()}
-            role="button"
-            tabIndex={0}
-            aria-label="Upload contract file"
-            onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
-          >
-            <input
-              id="contract-upload"
-              ref={inputRef}
-              type="file"
-              accept=".pdf,.docx,.txt"
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-            />
+          {/* Mode Switcher Tabs */}
+          <div className="workspace-mode-selector">
+            <button
+              type="button"
+              className={`mode-tab-btn ${inputMode === 'upload' ? 'is-active' : ''}`}
+              onClick={() => setInputMode('upload')}
+            >
+              <UploadCloud size={16} />
+              <span>Upload Document File</span>
+            </button>
 
-            <div className="scanner-line" />
-
-            <div className="barr-upload-crest">
-              <UploadCloud size={34} className="upload-icon-svg" />
-            </div>
-
-            <div className="barr-upload-prompt">
-              <span className="prompt-title">Drag &amp; Drop Contract Document Here</span>
-              <span className="prompt-sub">Click to browse your workstation &bull; Supports PDF, DOCX Word, and Plain Text</span>
-            </div>
-
-            <div className="barr-upload-badges">
-              <span className="barr-ft-badge">PDF AGREEMENT</span>
-              <span className="barr-ft-badge">DOCX CONTRACT</span>
-              <span className="barr-ft-badge">TXT BRIEF</span>
-            </div>
-          </Card3D>
-
-          {/* One-Click Quick Demo Agreements */}
-          <div className="barr-demo-bar">
-            <span className="demo-hint-text">Or test instantly with pre-loaded trial contracts:</span>
-            <div className="demo-buttons-flex">
-              <button
-                type="button"
-                className="barr-demo-btn"
-                disabled={demoLoading !== null}
-                onClick={() => handleLoadDemo('pdf')}
-              >
-                <FileText size={16} className="btn-icon" />
-                <span>{demoLoading === 'pdf' ? 'Analyzing…' : 'Try Master Service Agreement (PDF)'}</span>
-                <ArrowRight size={14} className="btn-arr" />
-              </button>
-
-              <button
-                type="button"
-                className="barr-demo-btn"
-                disabled={demoLoading !== null}
-                onClick={() => handleLoadDemo('docx')}
-              >
-                <FileCheck2 size={16} className="btn-icon" />
-                <span>{demoLoading === 'docx' ? 'Analyzing…' : 'Try Consulting NDA Agreement (DOCX)'}</span>
-                <ArrowRight size={14} className="btn-arr" />
-              </button>
-            </div>
+            <button
+              type="button"
+              className={`mode-tab-btn ${inputMode === 'text_form' ? 'is-active' : ''}`}
+              onClick={() => setInputMode('text_form')}
+            >
+              <FileEdit size={16} />
+              <span>Direct Contract Text / Clause Form</span>
+            </button>
           </div>
+
+          {/* MODE 1: FILE UPLOAD DROPZONE */}
+          {inputMode === 'upload' && (
+            <div className="mode-panel">
+              <Card3D
+                className={`lex-upload-card ${isDragOver ? 'is-drag-over' : ''}`}
+                maxTilt={4}
+                scale={1.008}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => inputRef.current?.click()}
+                role="button"
+                tabIndex={0}
+                aria-label="Upload contract file"
+                onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
+              >
+                <input
+                  id="contract-upload"
+                  ref={inputRef}
+                  type="file"
+                  accept=".pdf,.docx,.txt"
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                />
+
+                <div className="scanner-line" />
+
+                <div className="upload-crest-icon">
+                  <UploadCloud size={32} className="crest-svg" />
+                </div>
+
+                <div className="upload-prompt">
+                  <span className="prompt-title">Drag &amp; drop your agreement file here</span>
+                  <span className="prompt-sub">Click to browse your local device &bull; Supports PDF, DOCX, and TXT</span>
+                </div>
+
+                <div className="upload-file-types">
+                  <span className="ft-pill">PDF Document</span>
+                  <span className="ft-pill">DOCX Word</span>
+                  <span className="ft-pill">Plain Text TXT</span>
+                </div>
+              </Card3D>
+
+              {/* 1-Click Instant Demo Contracts */}
+              <div className="lex-demo-bar">
+                <span className="demo-label">Or test immediately with pre-loaded trial contracts:</span>
+                <div className="demo-actions">
+                  <button
+                    type="button"
+                    className="demo-card-btn"
+                    disabled={demoLoading !== null}
+                    onClick={() => handleLoadDemo('pdf')}
+                  >
+                    <FileText size={16} className="btn-ico" />
+                    <span>{demoLoading === 'pdf' ? 'Loading…' : 'Master Service Agreement (PDF)'}</span>
+                    <ArrowRight size={14} className="btn-arr" />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="demo-card-btn"
+                    disabled={demoLoading !== null}
+                    onClick={() => handleLoadDemo('docx')}
+                  >
+                    <FileCheck2 size={16} className="btn-ico" />
+                    <span>{demoLoading === 'docx' ? 'Loading…' : 'Consulting NDA Agreement (DOCX)'}</span>
+                    <ArrowRight size={14} className="btn-arr" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* MODE 2: DIRECT CONTRACT TEXT & CLAUSE INPUT FORM */}
+          {inputMode === 'text_form' && (
+            <Card3D className="mode-panel text-form-panel" maxTilt={2}>
+              <form onSubmit={handleTextFormSubmit} className="contract-input-form">
+                <div className="form-meta-row">
+                  <div className="form-field flex-2">
+                    <label htmlFor="doc-title-input" className="form-label">
+                      Document / Agreement Reference (Optional)
+                    </label>
+                    <input
+                      id="doc-title-input"
+                      type="text"
+                      className="form-text-input"
+                      placeholder="e.g. Master_Services_Agreement_2026"
+                      value={docTitle}
+                      onChange={(e) => setDocTitle(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-field flex-1">
+                    <label htmlFor="doc-cat-select" className="form-label">
+                      Agreement Category
+                    </label>
+                    <select
+                      id="doc-cat-select"
+                      className="form-select-input"
+                      value={docCategory}
+                      onChange={(e) => setDocCategory(e.target.value)}
+                    >
+                      <option value="NDA">Non-Disclosure Agreement (NDA)</option>
+                      <option value="MSA">Master Services Agreement (MSA)</option>
+                      <option value="SaaS">SaaS / Software License</option>
+                      <option value="Consulting">Consulting Agreement</option>
+                      <option value="Commercial">Commercial Vendor Contract</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-field">
+                  <div className="form-label-row">
+                    <label htmlFor="custom-contract-text" className="form-label">
+                      Contract Provisions / Clause Text
+                    </label>
+                    <div className="text-counts">
+                      <span>{customText.length} characters</span>
+                      <span>&bull;</span>
+                      <span>{customText.trim() ? customText.trim().split(/\s+/).length : 0} words</span>
+                    </div>
+                  </div>
+
+                  <textarea
+                    id="custom-contract-text"
+                    rows={10}
+                    className="form-textarea"
+                    placeholder="Paste contract clauses, terms of service, indemnification provisions, or whole agreements here…"
+                    value={customText}
+                    onChange={(e) => {
+                      setCustomText(e.target.value);
+                      if (formValidation) setFormValidation('');
+                    }}
+                  />
+                </div>
+
+                {formValidation && (
+                  <div className="form-validation-msg">
+                    <AlertCircle size={15} />
+                    <span>{formValidation}</span>
+                  </div>
+                )}
+
+                <div className="form-actions-row">
+                  <div className="form-quick-helpers">
+                    <button
+                      type="button"
+                      className="btn-helper"
+                      onClick={handleInsertSample}
+                      title="Paste a sample clause with uncapped liability & unilateral termination"
+                    >
+                      <Zap size={14} className="text-accent" />
+                      <span>Insert Sample High-Risk NDA</span>
+                    </button>
+
+                    {customText && (
+                      <button
+                        type="button"
+                        className="btn-helper btn-clear"
+                        onClick={handleClearForm}
+                      >
+                        <RotateCcw size={13} />
+                        <span>Clear Form</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <button type="submit" className="lex-btn lex-btn-gold">
+                    <span>Audit Contract Text</span>
+                    <ArrowRight size={15} />
+                  </button>
+                </div>
+              </form>
+            </Card3D>
+          )}
         </div>
       </section>
 
-      {/* 6. 3D Legal Practice Area / Capability Cards */}
-      <section className="barr-practice-section" id="practice-areas">
-        <div className="barr-container">
-          <div className="barr-section-header">
-            <div className="barr-subtitle">CORE CAPABILITIES</div>
-            <h2 className="barr-h2">High-Stakes Contract Intelligence Practice Areas</h2>
-            <p className="barr-section-desc">
-              Whether reviewing complex multi-tier vendor engagements or preparing litigation evidence for breach of fiduciary duty, our NLP architecture provides decisive clarity.
+      {/* 5. Core Platform Capabilities */}
+      <section className="lex-capabilities-section" id="capabilities">
+        <div className="lex-container">
+          <div className="lex-section-header">
+            <div className="lex-kicker">CORE ARCHITECTURE</div>
+            <h2 className="lex-h2">Engineered for Deterministic Legal Precision</h2>
+            <p className="lex-section-desc">
+              A modern NLP architecture marrying transformer-based multi-class classification with rule-based risk evaluation and grounded LLM reasoning.
             </p>
           </div>
 
-          <div className="barr-practice-grid">
-            {PRACTICE_AREAS.map((item, idx) => (
-              <Card3D key={idx} className="barr-practice-card" maxTilt={8} scale={1.02}>
-                <div className="card-img-wrap">
-                  <img src={item.img} alt={item.title} className="card-img" />
-                  <div className="card-img-tint" />
-                  <span className="card-category-pill">{item.category}</span>
-                </div>
-
-                <div className="card-body">
-                  <h3 className="card-title">{item.title}</h3>
-                  <p className="card-desc">{item.desc}</p>
-
-                  <div className="card-tags">
-                    {item.tags.map((tag, tIdx) => (
-                      <span key={tIdx} className="card-tag">{tag}</span>
-                    ))}
+          <div className="capabilities-grid">
+            {CAPABILITIES.map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <Card3D key={idx} className="capability-card" maxTilt={6} scale={1.015}>
+                  <div className="cap-card-header">
+                    <div className="cap-icon-pod">
+                      <Icon size={20} />
+                    </div>
+                    <span className="cap-badge">{item.stats}</span>
                   </div>
 
-                  <div className="card-action">
-                    <button type="button" onClick={scrollToAudit} className="barr-link-btn">
-                      <span>Audit With Engine</span>
-                      <ArrowRight size={14} className="link-arr" />
-                    </button>
-                  </div>
-                </div>
-              </Card3D>
-            ))}
+                  <div className="cap-category">{item.category}</div>
+                  <h3 className="cap-title">{item.title}</h3>
+                  <p className="cap-desc">{item.desc}</p>
+                </Card3D>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* 7. Executive Consultation Callout Banner */}
-      <section className="barr-consultation" id="consultation">
-        <div className="barr-container">
-          <div className="consultation-card">
-            <div className="consultation-content">
-              <span className="consultation-eyebrow">CONFIDENTIAL LEGAL COUNSEL</span>
-              <h2 className="consultation-title">
-                Protect Your Organization Against Unilateral Terms &amp; Hidden Fiduciary Liabilities
-              </h2>
-              <p className="consultation-text">
-                Speak directly with our Northern California litigation team or run your executed agreements through our automated NLP platform for immediate risk detection and remediation suggestions.
+      {/* 6. Clean Platform Footer */}
+      <footer className="lex-footer">
+        <div className="lex-container">
+          <div className="footer-flex-row">
+            <div className="footer-brand-side">
+              <div className="footer-logo">
+                <Scale size={18} className="text-accent" />
+                <span>LexAI</span>
+              </div>
+              <p className="footer-tagline">
+                AI-Powered Contract Intelligence &amp; Risk Scoring NLP Platform
               </p>
-              <div className="consultation-actions">
-                <a href="tel:+19253149999" className="barr-btn barr-btn-gold">
-                  <Phone size={15} />
-                  <span className="btn-text">Call (925) 314-9999</span>
-                </a>
-                <button type="button" onClick={scrollToAudit} className="barr-btn barr-btn-outline-white">
-                  <span className="btn-text">Launch Online Audit</span>
-                  <ArrowRight size={15} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. Stately Law Firm Footer (Barr & Douds Style) */}
-      <footer className="barr-footer">
-        <div className="barr-container">
-          <div className="footer-top-grid">
-            <div className="footer-col-brand">
-              <div className="footer-brand-title">BARR &amp; DOUDS ATTORNEYS</div>
-              <p className="footer-brand-desc">
-                Trust, estate, and high-stakes contractual litigation attorneys serving Danville, San Francisco, Walnut Creek, Oakland, and all of Northern California since 2007.
-              </p>
-              <div className="footer-phone-direct">
-                <span className="phone-label">DIRECT COUNSEL:</span>
-                <a href="tel:+19253149999" className="phone-link">(925) 314-9999</a>
-              </div>
             </div>
 
-            <div className="footer-col-links">
-              <div className="footer-col-title">PRACTICE AREAS</div>
-              <ul className="footer-link-list">
-                <li><a href="#practice-areas">Trust Litigation &amp; Fiduciary Accounting</a></li>
-                <li><a href="#practice-areas">Breach of Fiduciary Duty</a></li>
-                <li><a href="#practice-areas">Contested Conservatorships &amp; Elder Law</a></li>
-                <li><a href="#practice-areas">Commercial Contract Risk Defense</a></li>
-                <li><a href="#practice-areas">Liability Shield Auditing</a></li>
-              </ul>
-            </div>
-
-            <div className="footer-col-links">
-              <div className="footer-col-title">OFFICE LOCATION</div>
-              <div className="footer-address">
-                <p><strong>Danville Office:</strong></p>
-                <p>Barr &amp; Douds Attorneys</p>
-                <p>490 Hartz Avenue, Suite 200</p>
-                <p>Danville, CA 94526</p>
-                <p>Contra Costa County</p>
-              </div>
-            </div>
-
-            <div className="footer-col-links">
-              <div className="footer-col-title">AI INTELLIGENCE</div>
-              <ul className="footer-link-list">
-                <li><a href="#audit-section">CUAD Clause Classification</a></li>
-                <li><a href="#audit-section">spaCy Legal NER Engine</a></li>
-                <li><a href="#audit-section">Google Gemini Q&amp;A Model</a></li>
-                <li><a href="#audit-section">Deterministic Risk Engine</a></li>
-                <li><a href="#audit-section">Executive PDF Risk Export</a></li>
-              </ul>
+            <div className="footer-tech-stack">
+              <span className="tech-label">POWERED BY:</span>
+              <span className="tech-badge">FastAPI</span>
+              <span className="tech-badge">Transformers</span>
+              <span className="tech-badge">spaCy NER</span>
+              <span className="tech-badge">Google Gemini</span>
+              <span className="tech-badge">React 18 &bull; Three.js</span>
             </div>
           </div>
 
-          <div className="footer-bottom-bar">
+          <div className="footer-bottom-line">
             <div className="footer-copy">
-              &copy; {new Date().getFullYear()} Barr &amp; Douds Attorneys | LexAI Contract Intelligence Platform. All rights reserved.
+              &copy; {new Date().getFullYear()} LexAI Platform. Developed for Automated Contract Risk Auditing.
             </div>
-            <div className="footer-legal-note">
-              Confidential Attorney-Client Communication Privileged where applicable. AI contract scoring is an analytical tool and does not constitute formal legal counsel.
+            <div className="footer-repo-link">
+              <a
+                href="https://github.com/PShreesh7/AI-Powered-Contract-Intelligence-Risk-Scoring-NLP-"
+                target="_blank"
+                rel="noreferrer"
+                className="repo-link"
+              >
+                GitHub Repository &bull; Open Architecture
+              </a>
             </div>
           </div>
         </div>

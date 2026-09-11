@@ -12,6 +12,7 @@ import {
   Copy,
   Check,
   Sparkles,
+  AlertTriangle,
 } from 'lucide-react';
 import Card3D from './Card3D.jsx';
 
@@ -40,7 +41,6 @@ export default function ClauseCard({ clause, isSelected, onSelect }) {
   const IconComponent = getClauseIcon(clause.clauseType);
 
   const handleCardClick = (e) => {
-    // Avoid re-toggling if clicking copy button
     if (e.target.closest('.copy-btn')) return;
     onSelect(clause.id);
     setExpanded((prev) => !prev);
@@ -64,22 +64,33 @@ export default function ClauseCard({ clause, isSelected, onSelect }) {
 
   const riskGlow =
     clause.risk === 'high'
-      ? 'rgba(255, 77, 77, 0.25)'
+      ? 'rgba(255, 77, 77, 0.22)'
       : clause.risk === 'medium'
-      ? 'rgba(255, 166, 0, 0.22)'
-      : 'rgba(0, 230, 153, 0.18)';
+      ? 'rgba(255, 166, 0, 0.20)'
+      : 'rgba(0, 230, 153, 0.16)';
+
+  // Determine whether to display a sub-category tag (only if distinct from label)
+  const normLabel = (clause.label || '').toLowerCase().trim();
+  const normType = (clause.clauseType || '').toLowerCase().replace(/_/g, ' ').trim();
+  const showSubTag = normType && normLabel !== normType;
+
+  // Filter out redundant/generic NLP placeholder text
+  const isGenericRationale =
+    !clause.rationale ||
+    clause.rationale.trim() === 'Clause identified by NLP model.' ||
+    clause.rationale.trim() === 'Standard clause identified.';
 
   return (
     <Card3D
       className={`clause-card-3d risk-${clause.risk} ${isSelected ? 'is-selected' : ''}`}
-      maxTilt={5}
-      scale={1.01}
+      maxTilt={4}
+      scale={1.008}
       onClick={handleCardClick}
       style={{
         borderLeft: `4px solid ${riskColor}`,
         boxShadow: isSelected
-          ? `0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px ${riskGlow}`
-          : '0 4px 18px rgba(0, 0, 0, 0.35)',
+          ? `0 12px 28px rgba(0, 0, 0, 0.45), 0 0 16px ${riskGlow}`
+          : '0 4px 16px rgba(0, 0, 0, 0.3)',
       }}
       role="button"
       tabIndex={0}
@@ -90,30 +101,29 @@ export default function ClauseCard({ clause, isSelected, onSelect }) {
       <div className="clause-3d-header">
         <div
           className="clause-icon-wrap"
-          style={{ background: `${riskColor}18`, color: riskColor, borderColor: `${riskColor}44` }}
+          style={{ background: `${riskColor}14`, color: riskColor, borderColor: `${riskColor}38` }}
         >
-          <IconComponent size={18} />
+          <IconComponent size={17} />
         </div>
 
         <div className="clause-title-wrap">
           <div className="clause-name">{clause.label}</div>
-          <div className="clause-category-tag">{clause.clauseType}</div>
+          {showSubTag && <div className="clause-category-tag">{clause.clauseType}</div>}
         </div>
 
         <div className="clause-badge-wrap">
           <span
             className="risk-pill"
             style={{
-              background: `${riskColor}18`,
-              borderColor: `${riskColor}44`,
+              background: `${riskColor}15`,
+              borderColor: `${riskColor}40`,
               color: riskColor,
-              boxShadow: `0 0 8px ${riskColor}33`,
             }}
           >
             {clause.risk === 'medium' ? 'MED RISK' : `${clause.risk.toUpperCase()} RISK`}
           </span>
           <ChevronDown
-            size={18}
+            size={17}
             className={`chevron-icon ${expanded ? 'rotated' : ''}`}
           />
         </div>
@@ -126,22 +136,25 @@ export default function ClauseCard({ clause, isSelected, onSelect }) {
           style={{
             width: `${clause.riskScore}%`,
             background: `linear-gradient(90deg, ${riskColor}88, ${riskColor})`,
-            boxShadow: `0 0 10px ${riskColor}aa`,
           }}
         />
       </div>
 
-      {/* Rationale Excerpt */}
-      <p className="clause-brief">{clause.rationale}</p>
+      {/* Rationale / Summary */}
+      {!isGenericRationale ? (
+        <p className="clause-brief">{clause.rationale}</p>
+      ) : clause.risk === 'high' ? (
+        <p className="clause-brief text-danger">High exposure detected in legal terms.</p>
+      ) : null}
 
       {/* Expanded Details */}
       {expanded && (
         <div className="clause-expand-body">
           <div className="clause-quote-box">
-            <span className="quote-label">CONTRACT EXCERPT:</span>
+            <span className="quote-label">CONTRACT EXCERPT</span>
             <p className="quote-content">
-              "{clause.text?.slice(0, 280)}
-              {clause.text?.length > 280 ? '…' : ''}"
+              "{clause.text?.slice(0, 320)}
+              {clause.text?.length > 320 ? '…' : ''}"
             </p>
           </div>
 
@@ -150,7 +163,7 @@ export default function ClauseCard({ clause, isSelected, onSelect }) {
               <div className="sugg-header">
                 <div className="sugg-title">
                   <Sparkles size={14} className="sparkle-icon" />
-                  <span>AI Legal Remediation Suggestion</span>
+                  <span>AI Remediation Guidance</span>
                 </div>
                 <button
                   type="button"
@@ -161,7 +174,7 @@ export default function ClauseCard({ clause, isSelected, onSelect }) {
                   {copied ? (
                     <>
                       <Check size={13} />
-                      <span>Copied!</span>
+                      <span>Copied</span>
                     </>
                   ) : (
                     <>
@@ -177,7 +190,7 @@ export default function ClauseCard({ clause, isSelected, onSelect }) {
 
           <div className="clause-footer-meta">
             <div className="meta-confidence">
-              <span>Model Confidence:</span>
+              <span>Confidence:</span>
               <strong>{Math.round((clause.confidence ?? 0) * 100)}%</strong>
               <div className="confidence-track">
                 <div
